@@ -2,6 +2,12 @@
 
 #define PROFILER_HOOK_THIS_ARGS(address, ret, space, type, name, argsC, ...) PROFILER_HOOK(address, space##::##type##::##name, ret, __thiscall, __fastcall, space##_##type##_##name, (space##::##type*, __VA_ARGS__), (space##::##type* self, void*, __VA_ARGS__), argsC)
 #define PROFILER_HOOK_THIS(address, ret, space, type, name) PROFILER_HOOK(address, space##::##type##::##name, ret, __thiscall, __fastcall, space##_##type##_##name, (space##::##type*), (space##::##type* self), (self))
+#define PROFILER_HOOK_2_ARGS(address, ret, callConv, space, type, name, argsC, ...) PROFILER_HOOK(address, space##::##type##::##name, ret, callConv, callConv, space##_##type##_##name, (__VA_ARGS__), (__VA_ARGS__), argsC)
+#define PROFILER_HOOK_2(address, ret, callConv, space, type, name) PROFILER_HOOK(address, space##::##type##::##name, ret, callConv, callConv, space##_##type##_##name, (), (), ())
+#define PROFILER_HOOK_1_ARGS(address, ret, callConv, space, name, argsC, ...) PROFILER_HOOK(address, space##::##name, ret, callConv, callConv, space##_##name, (__VA_ARGS__), (__VA_ARGS__), argsC)
+#define PROFILER_HOOK_1(address, ret, callConv, space, name) PROFILER_HOOK(address, space##::##name, ret, callConv, callConv, space##_##name, (), (), ())
+#define PROFILER_HOOK_0_ARGS(address, ret, callConv, name, argsC, ...) PROFILER_HOOK(address, name, ret, callConv, callConv, name, (__VA_ARGS__), (__VA_ARGS__), argsC)
+#define PROFILER_HOOK_0(address, ret, callConv, name) PROFILER_HOOK(address, name, ret, callConv, callConv, name, (), (), ())
 
 // haha rip dll size
 
