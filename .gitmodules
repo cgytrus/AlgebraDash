@@ -1,0 +1,12 @@
+[submodule "libraries/minhook"]
+	path = libraries/minhook
+	url = https://github.com/TsudaKageyu/minhook
+[submodule "libraries/cocos-headers"]
+	path = libraries/cocos-headers
+	url = https://github.com/HJfod/cocos-headers
+[submodule "libraries/gd.h"]
+	path = libraries/gd.h
+	url = https://github.com/cgytrus/gd.h
+[submodule "libraries/tracy"]
+	path = libraries/tracy
+	url = https://github.com/wolfpld/tracy
