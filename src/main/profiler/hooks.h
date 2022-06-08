@@ -1,4 +1,4 @@
-#include "../includes.h"
+#include "../../includes.h"
 
 #define PROFILER_HOOK_THIS_ARGS(address, ret, space, type, name, argsC, ...) PROFILER_HOOK(address, space##::##type##::##name, ret, __thiscall, __fastcall, space##_##type##_##name, (space##::##type*, __VA_ARGS__), (space##::##type* self, void*, __VA_ARGS__), argsC)
 #define PROFILER_HOOK_THIS(address, ret, space, type, name) PROFILER_HOOK(address, space##::##type##::##name, ret, __thiscall, __fastcall, space##_##type##_##name, (space##::##type*), (space##::##type* self), (self))
@@ -13,6 +13,8 @@
 
 // pre frame
 PROFILER_HOOK_THIS(COCOS2D + 0xc44b0, void, cocos2d, CCEGLView, pollEvents)
+PROFILER_HOOK_2_ARGS(COCOS2D + 0x110dc0, void, __cdecl, cocos2d, CCEGLView, FUN_10110dc0, (idk), int idk)
+PROFILER_HOOK_2_ARGS(COCOS2D + 0x111a80, void, __cdecl, cocos2d, CCEGLView, FUN_10111a80, (idk1, idk2, idk3, idk4, idk5), int idk1, int idk2, int idk3, int idk4, int idk5)
 PROFILER_HOOK_THIS_ARGS(COCOS2D + 0x100470, void, cocos2d, CCDirector, setDeltaTime, (self, dt), float dt)
 
 // actual frame
@@ -42,6 +44,29 @@ PROFILER_HOOK_THIS_ARGS(GD + 0x2029c0, void, gd, PlayLayer, update, (self, dt), 
 PROFILER_HOOK_THIS(GD + 0x16ce90, void, gd, DrawGridLayer, draw)
 PROFILER_HOOK_THIS(GD + 0x18fbe0, void, gd, EditorUI, draw)
 PROFILER_HOOK_THIS(GD + 0x16b7c0, void, gd, LevelEditorLayer, draw)
+
+// loading
+PROFILER_HOOK_THIS(GD + 0x18c8e0, void, gd, LoadingLayer, loadAssets)
+PROFILER_HOOK_THIS_ARGS(COCOS2D + 0xeb860, CCTexture2D*, cocos2d, CCTextureCache, addImage, (self, path, idk), const char* path, bool idk)
+PROFILER_HOOK_THIS_ARGS(COCOS2D + 0xebcb0, CCTexture2D*, cocos2d, CCTextureCache, addImageAsync, (self, path, target, selector), const char* path, CCObject* target, SEL_CallFuncO selector)
+PROFILER_HOOK_2_ARGS(COCOS2D + 0xec7c0, void*, __cdecl, cocos2d, CCTextureCache, loadImage, (data), void* data)
+PROFILER_HOOK_2_ARGS(COCOS2D + 0xec9a0, void, __cdecl, cocos2d, CCTextureCache, loadImageData, (pAsyncStruct), void* pAsyncStruct)
+PROFILER_HOOK_THIS_ARGS(COCOS2D + 0xd7e30, void, cocos2d, CCSpriteFrameCache, addSpriteFramesWithDictionary, (self, dict, texture), CCDictionary* dict, CCTexture2D* texture)
+PROFILER_HOOK_THIS_ARGS(COCOS2D + 0xd8820, void, cocos2d, CCSpriteFrameCache, addSpriteFramesWithFile_pp, (self, plistPath, texturePath), const char* plistPath, const char* texturePath)
+PROFILER_HOOK_THIS_ARGS(COCOS2D + 0xd8860, void, cocos2d, CCSpriteFrameCache, addSpriteFramesWithFile_p, (self, plistPath), const char* plistPath)
+PROFILER_HOOK_THIS_ARGS(COCOS2D + 0xd8b80, void, cocos2d, CCSpriteFrameCache, addSpriteFramesWithFile_pt, (self, plistPath, texture), const char* plistPath, CCTexture2D* texture)
+PROFILER_HOOK_2_ARGS(COCOS2D + 0x9c600, CCLabelBMFont*, __cdecl, cocos2d, CCLabelBMFont, create, (idk1, idk2, idk3, idk4, idk5), const char* idk1, const char* idk2, float idk3, CCTextAlignment idk4, CCPoint idk5)
+PROFILER_HOOK_THIS(GD + 0x25520, void, gd, GameSoundManager, asynchronousSetup)
+PROFILER_HOOK_THIS(GD + 0xc9420, void, gd, GameManager, FUN_0049420)
+PROFILER_HOOK_THIS(GD + 0xa8cb0, void, gd, GameLevelManager, FUN_004a8cb0)
+PROFILER_HOOK_THIS_ARGS(COCOS2D + 0xea010, void, cocos2d, CCTexture2D, initWithImage, (self, image), CCImage* image)
+PROFILER_HOOK_2_ARGS(COCOS2D + 0x9c490, CCBMFontConfiguration*, __cdecl, cocos2d, CCBMFontConfiguration, create, (fntFile), const char* fntFile)
+PROFILER_HOOK_THIS_ARGS(COCOS2D + 0x9e240, void*, cocos2d, CCBMFontConfiguration, parseConfigFile, (self, fntFile), const char* fntFile)
+PROFILER_HOOK_THIS_ARGS(COCOS2D + 0xd5e30, bool, cocos2d, CCSpriteBatchNode, initWithTexture, (self, texture, capacity), CCTexture2D* texture, unsigned int capacity)
+PROFILER_HOOK_THIS_ARGS(COCOS2D + 0xd3910, bool, cocos2d, CCSprite, initWithTexture, (self, texture, rect, rotated), CCTexture2D* texture, CCRect* rect, bool rotated)
+PROFILER_HOOK_THIS_ARGS(COCOS2D + 0xeabb0, bool, cocos2d, CCTextureAtlas, initWithTexture, (self, texture, capacity), CCTexture2D* texture, unsigned int capacity)
+PROFILER_HOOK_THIS(COCOS2D + 0xeb340, void, cocos2d, CCTextureAtlas, setupIndices)
+PROFILER_HOOK_THIS(COCOS2D + 0xeaf30, void, cocos2d, CCTextureAtlas, mapBuffers)
 
 PROFILER_HOOK_THIS_ARGS(COCOS2D + 0x103430, void, cocos2d, CCScheduler, update, (self, dt), float dt)
 PROFILER_HOOK_THIS_ARGS(COCOS2D + 0xc09a0, void, cocos2d, CCAccelerometer, update, (self, dt), float dt)

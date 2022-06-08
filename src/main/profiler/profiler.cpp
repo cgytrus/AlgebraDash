@@ -1,12 +1,8 @@
-// no point in profiler with tracy off
 #ifdef TRACY_ENABLE
 
-#include "../includes.h"
-#include "../patcher.h"
+#include "../../includes.h"
+#include "../../patcher.h"
 #include <memory>
-// windows u dumb u break my tracy hhhhhhhh
-#undef max
-#include <Tracy.hpp>
 
 #define HOOK(address, name) MH_CreateHook(reinterpret_cast<void*>(address), \
     reinterpret_cast<void*>(&##name##_H), \
@@ -164,14 +160,10 @@ void initTracyHooks() {
 #undef COCOS2D
 #undef PROFILER_HOOK
 
-BOOL APIENTRY DllMain(HMODULE handle, DWORD reason, LPVOID reserved) {
-    if(reason == DLL_PROCESS_ATTACH) {
-        MH_Initialize();
-        auto address = reinterpret_cast<uintptr_t>(GetModuleHandle("libcocos2d.dll")) + 0xc1c20;
-        HOOK(address, CCApplication_setupVerticalSync);
-        MH_EnableHook(reinterpret_cast<void*>(address));
-    }
-    return TRUE;
+void initProfiler() {
+    auto address = reinterpret_cast<uintptr_t>(GetModuleHandle("libcocos2d.dll")) + 0xc1c20;
+    HOOK(address, CCApplication_setupVerticalSync);
+    MH_EnableHook(reinterpret_cast<void*>(address));
 }
 
 #endif

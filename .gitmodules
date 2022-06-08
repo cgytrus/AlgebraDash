@@ -3,7 +3,7 @@
 	url = https://github.com/TsudaKageyu/minhook
 [submodule "libraries/cocos-headers"]
 	path = libraries/cocos-headers
-	url = https://github.com/HJfod/cocos-headers
+	url = https://github.com/cgytrus/cocos-headers
 [submodule "libraries/gd.h"]
 	path = libraries/gd.h
 	url = https://github.com/cgytrus/gd.h

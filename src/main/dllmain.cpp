@@ -1,6 +1,9 @@
 #include "../includes.h"
+#include "../ThreadPool.hpp"
+#include "profiler/profiler.h"
+#include "loading/loading.h"
 
-//#define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 #include <iostream>
@@ -16,7 +19,11 @@ DWORD WINAPI mainThread(void* hModule) {
     std::cin.rdbuf(conin.rdbuf());
 #endif
 
-    MH_Initialize();
+    auto base = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
+    auto cocos2dBase = reinterpret_cast<uintptr_t>(GetModuleHandle("libcocos2d.dll"));
+
+    initThreadPool(cocos2dBase);
+    initLoadingOptimizations(base);
 
     MH_EnableHook(MH_ALL_HOOKS);
 
@@ -35,7 +42,12 @@ DWORD WINAPI mainThread(void* hModule) {
 }
 
 BOOL APIENTRY DllMain(HMODULE handle, DWORD reason, LPVOID reserved) {
-    if(reason == DLL_PROCESS_ATTACH)
+    if(reason == DLL_PROCESS_ATTACH) {
+        MH_Initialize();
+#ifdef TRACY_ENABLE
+        initProfiler();
+#endif
         CreateThread(nullptr, 0x100, mainThread, handle, 0, nullptr);
+    }
     return TRUE;
 }
