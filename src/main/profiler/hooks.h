@@ -156,6 +156,8 @@ PROFILER_HOOK_THIS_ARGS(COCOS2D + 0xd68f0, void, cocos2d, CCSpriteBatchNode, swa
 PROFILER_HOOK_THIS_ARGS(COCOS2D + 0x9fb60, void, cocos2d, CCLabelBMFont, setString, (self, str, needUpdateLabel), const char* str, bool needUpdateLabel)
 PROFILER_HOOK_THIS(COCOS2D + 0x9fd60, void, cocos2d, CCLabelBMFont, updateLabel)
 
+PROFILER_HOOK_THIS_ARGS(COCOS2D + 0xeb3e0, void, cocos2d, CCTextureAtlas, updateQuad, (self, quad, idk), ccV3F_C4B_T2F_Quad* quad, unsigned int idk)
+
 PROFILER_HOOK_THIS_ARGS(COCOS2D + 0x60a50, void, cocos2d, CCNode, update, (self, dt), float dt)
 PROFILER_HOOK_THIS(COCOS2D + 0x60c50, void, cocos2d, CCNode, visit)
 PROFILER_HOOK_THIS(COCOS2D + 0x60c10, void, cocos2d, CCNode, updateTransform)
