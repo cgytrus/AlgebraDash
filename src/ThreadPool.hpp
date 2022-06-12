@@ -15,7 +15,6 @@ public:
     void queueJob(const std::function<void()>& job);
     void stop();
     void tryExecuteJob();
-    bool busy();
 
 private:
     void threadLoop();

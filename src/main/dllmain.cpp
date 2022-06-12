@@ -1,7 +1,10 @@
 #include "../includes.h"
 #include "../ThreadPool.hpp"
+
 #include "profiler/profiler.h"
+
 #include "loading/loading.h"
+#include "rendering/rendering.h"
 
 #define DEBUG
 
@@ -24,6 +27,7 @@ DWORD WINAPI mainThread(void* hModule) {
 
     initThreadPool(cocos2dBase);
     initLoadingOptimizations(base);
+    initRenderingOptimizations(cocos2dBase);
 
     MH_EnableHook(MH_ALL_HOOKS);
 

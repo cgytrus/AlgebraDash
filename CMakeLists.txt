@@ -28,6 +28,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 add_subdirectory(libraries/minhook)
 target_link_libraries(${PROJECT_NAME} minhook)
 
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+  RENDER_THREAD_BATCH_COUNT=10
+)
+
 set(TRACY_ENABLE ON)
 set(TRACY_ON_DEMAND ON)
 

@@ -5,6 +5,7 @@ static ThreadPool* _sharedPool;
 ThreadPool* ThreadPool::sharedPool() { return _sharedPool; }
 
 void ThreadPool::start() {
+    ZoneScoped
     // one thread is the main thread
     const uint32_t threadCount = std::thread::hardware_concurrency() - 1;
     threads.resize(threadCount);
@@ -13,6 +14,7 @@ void ThreadPool::start() {
 }
 
 void ThreadPool::queueJob(const std::function<void()>& job) {
+    ZoneScoped
     {
         std::unique_lock<std::mutex> lock(queueMutex);
         jobs.push(job);
@@ -21,6 +23,7 @@ void ThreadPool::queueJob(const std::function<void()>& job) {
 }
 
 void ThreadPool::stop() {
+    ZoneScoped
     {
         std::unique_lock<std::mutex> lock(queueMutex);
         shouldTerminate = true;
@@ -32,6 +35,7 @@ void ThreadPool::stop() {
 }
 
 void ThreadPool::tryExecuteJob() {
+    ZoneScoped
     std::function<void()> job;
     {
         std::unique_lock<std::mutex> lock(queueMutex);
@@ -41,15 +45,6 @@ void ThreadPool::tryExecuteJob() {
         jobs.pop();
     }
     job();
-}
-
-bool ThreadPool::busy() {
-    bool isBusy;
-    {
-        std::unique_lock<std::mutex> lock(queueMutex);
-        isBusy = !jobs.empty();
-    }
-    return isBusy;
 }
 
 void ThreadPool::threadLoop() {

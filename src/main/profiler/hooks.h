@@ -40,6 +40,9 @@ PROFILER_HOOK_THIS_ARGS(GD + 0x16a660, void, gd, LevelEditorLayer, update, (self
 PROFILER_HOOK_THIS_ARGS(GD + 0x1e8200, void, gd, PlayerObject, update, (self, dt), float dt)
 PROFILER_HOOK_THIS_ARGS(GD + 0x2029c0, void, gd, PlayLayer, update, (self, dt), float dt)
 
+PROFILER_HOOK_THIS_ARGS(GD + 0xc9d30, bool, gd, GameManager, getGameVariable, (self, key), const char* key)
+PROFILER_HOOK_THIS_ARGS(GD + 0xc9b50, void, gd, GameManager, setGameVariable, (self, key, value), const char* key, bool value)
+
 // gd draw
 PROFILER_HOOK_THIS(GD + 0x16ce90, void, gd, DrawGridLayer, draw)
 PROFILER_HOOK_THIS(GD + 0x18fbe0, void, gd, EditorUI, draw)
