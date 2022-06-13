@@ -12,18 +12,26 @@ public:
     static ThreadPool* sharedPool();
 
     void start();
+    void queueOneJob(const std::function<void()>& job);
     void queueJob(const std::function<void()>& job);
+    void finishQueue();
     void stop();
-    void tryExecuteJob();
+    void waitForAllJobs();
+    size_t getJobCount();
 
 private:
     void threadLoop();
 
-    bool shouldTerminate = false; // Tells threads to stop looking for jobs
-    std::mutex queueMutex; // Prevents data races to the job queue
-    std::condition_variable mutexCondition; // Allows threads to wait on new jobs or termination 
     std::vector<std::thread> threads;
+
+    size_t jobCount = 0;
+    std::mutex jobCountMutex;
+    std::condition_variable jobCountCondition;
+
     std::queue<std::function<void()>> jobs;
+    bool shouldTerminate = false;
+    std::mutex queueMutex;
+    std::condition_variable mutexCondition;
 };
 
 void initThreadPool(uintptr_t cocos2dBase);

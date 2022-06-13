@@ -40,6 +40,31 @@ PROFILER_HOOK_THIS_ARGS(GD + 0x16a660, void, gd, LevelEditorLayer, update, (self
 PROFILER_HOOK_THIS_ARGS(GD + 0x1e8200, void, gd, PlayerObject, update, (self, dt), float dt)
 PROFILER_HOOK_THIS_ARGS(GD + 0x2029c0, void, gd, PlayLayer, update, (self, dt), float dt)
 
+PROFILER_HOOK_THIS(GD + 0x11e1d0, void, gd, GJEffectManager, updateColorEffects)
+PROFILER_HOOK_THIS(GD + 0x11e7f0, void, gd, GJEffectManager, updatePulseEffects)
+PROFILER_HOOK_THIS(GD + 0x11e490, void, gd, GJEffectManager, updateOpacityEffects)
+PROFILER_HOOK_THIS(GD + 0x11f000, void, gd, GJEffectManager, updateSpawnTriggers)
+PROFILER_HOOK_THIS(GD + 0x11d030, void, gd, GJEffectManager, preCollisionCheck)
+PROFILER_HOOK_THIS_ARGS(GD + 0x11da30, void, gd, GJEffectManager, prepareMoveActions, (self, idk), bool idk)
+PROFILER_HOOK_THIS(GD + 0x10ffa0, void, gd, PlayLayer, FUN_0050ffa0)
+PROFILER_HOOK_THIS(GD + 0x10ef70, void, gd, PlayLayer, FUN_0050ef70)
+PROFILER_HOOK_THIS(GD + 0x1e8b50, void, gd, PlayerObject, updateCheckpointTest)
+PROFILER_HOOK_THIS(GD + 0x11d0b0, void, gd, PlayLayer, FUN_0051d0b0)
+PROFILER_HOOK_THIS(GD + 0x111b00, void, gd, PlayLayer, FUN_00511b00)
+PROFILER_HOOK_THIS(GD + 0x2071d0, void, gd, PlayLayer, updateCamera)
+//PROFILER_HOOK_THIS(GD + 0x206e10, void, gd, PlayLayer, updateVisibility) // what even is this lmao
+PROFILER_HOOK_THIS(GD + 0x205460, void, gd, PlayLayer, updateVisibility)
+PROFILER_HOOK_THIS(GD + 0x11c7c0, void, gd, GJEffectManager, calculateBaseActiveColors)
+PROFILER_HOOK_THIS(GD + 0x11ea50, void, gd, GJEffectManager, processPulseActions)
+PROFILER_HOOK_THIS(GD + 0x11c8a0, void, gd, GJEffectManager, processInheritedColors)
+PROFILER_HOOK_THIS(GD + 0x11ebc0, void, gd, GJEffectManager, processCopyColorPulseActions)
+PROFILER_HOOK_THIS_ARGS(GD + 0x11ce20, int, gd, GJEffectManager, getColorSprite, (self, index), int index)
+PROFILER_HOOK_THIS_ARGS(GD + 0x11f420, void, gd, GJEffectManager, calculateLightBGColor, (self, idk), int idk)
+//PROFILER_HOOK_THIS_ARGS(GD + 0x26a60, void, gd, GJEffectManager, FUN_00426a60, (self, idk1, idk2, idk3, idk4, idk5), void* idk1, float idk2, float idk3, float idk4, int idk5)
+//PROFILER_HOOK_THIS(GD + 0xebda0, void, gd, GameObject, FUN_004ebda0) // idk which class it's actually in
+PROFILER_HOOK_THIS_ARGS(GD + 0xeb3f0, void, gd, GameObject, addColorSpriteToParent, (self, idk), bool idk)
+PROFILER_HOOK_THIS_ARGS(GD + 0x2531f0, void, gd, GameObject, updateChildSpriteColor, (self, idk), int idk) // actually in AnimatedGameObject
+
 PROFILER_HOOK_THIS_ARGS(GD + 0xc9d30, bool, gd, GameManager, getGameVariable, (self, key), const char* key)
 PROFILER_HOOK_THIS_ARGS(GD + 0xc9b50, void, gd, GameManager, setGameVariable, (self, key, value), const char* key, bool value)
 
@@ -150,6 +175,12 @@ PROFILER_HOOK_THIS(COCOS2D + 0xb9bc0, void, cocos2d, CCParticleSystem, updateWit
 PROFILER_HOOK_THIS(COCOS2D + 0xba0a0, void, cocos2d, CCParticleSystemQuad, draw)
 
 // sprites
+PROFILER_HOOK_THIS_ARGS(COCOS2D + 0xd4050, void, cocos2d, CCSprite, setOpacity, (self, opacity), GLubyte opacity)
+PROFILER_HOOK_THIS_ARGS(COCOS2D + 0xd3e70, void, cocos2d, CCSprite, setColor, (self, color3), const ccColor3B& color3)
+PROFILER_HOOK_THIS_ARGS(COCOS2D + 0xd40c0, void, cocos2d, CCSprite, setOpacityModifyRGB, (self, modify), bool modify)
+PROFILER_HOOK_THIS_ARGS(COCOS2D + 0xd4f00, void, cocos2d, CCSprite, updateDisplayedColor, (self, parentColor), const ccColor3B& parentColor)
+PROFILER_HOOK_THIS_ARGS(COCOS2D + 0xd4f20, void, cocos2d, CCSprite, updateDisplayedOpacity, (self, opacity), GLubyte opacity)
+PROFILER_HOOK_THIS(COCOS2D + 0xd4e20, void, cocos2d, CCSprite, updateColor)
 PROFILER_HOOK_THIS(COCOS2D + 0xd4f40, void, cocos2d, CCSprite, updateTransform)
 PROFILER_HOOK_THIS(COCOS2D + 0xd3650, void, cocos2d, CCSprite, draw)
 PROFILER_HOOK_THIS(COCOS2D + 0xd3560, CCSpriteFrame*, cocos2d, CCSprite, displayFrame)

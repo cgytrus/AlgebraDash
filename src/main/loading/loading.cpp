@@ -2,8 +2,6 @@
 #include "../../ThreadPool.hpp"
 #include <mutex>
 
-int loadCounter = 0;
-
 const CCTexture2DPixelFormat kCCTexture2DPixelFormat_DontChange = (CCTexture2DPixelFormat)-1;
 std::mutex loadedImagesMutex;
 typedef void(*LoadedImageCallback)(CCTexture2D* texture);
@@ -18,8 +16,6 @@ std::vector<LoadedImage> loadedImages;
 void addImage(CCTextureCache* self, const char* path, const char* plistPath, LoadedImageCallback callback = nullptr,
     CCTexture2DPixelFormat pixelFormat = kCCTexture2DPixelFormat_DontChange) {
     ZoneScoped
-
-    ++loadCounter;
 
     CCImage* pImage = nullptr;
 
@@ -87,6 +83,7 @@ void addFont(CCTextureCache* textureCache, const char* fontFile) {
         return;
     fontConf->retain();
     addImage(textureCache, fontConf->getAtlasName(), nullptr);
+    ThreadPool::sharedPool()->finishQueue();
     //addImage(textureCache, /*fontConf->getAtlasName()*/atlasFile, nullptr, [](CCTexture2D* texture) {
         //CCLabelBMFont::create(" ", fontFile);
         //CCSpriteBatchNode::createWithTexture(texture, 1);
@@ -112,8 +109,6 @@ void __fastcall LoadingLayer_loadAssets_H(gd::LoadingLayer* self) {
     auto contentManager = CCContentManager::sharedManager();
     auto gameManager = gd::GameManager::sharedState();
     if(*m_nLoadIndex < 1) {
-        loadCounter = 0;
-
         auto m_bUseRobtopDumbFormatForColorPicker = (bool*)((uintptr_t)application + 0xa7);
 
         // 1
@@ -172,6 +167,9 @@ void __fastcall LoadingLayer_loadAssets_H(gd::LoadingLayer* self) {
             addImage(textureCache, "GJ_square05.png", nullptr);
             addImage(textureCache, "gravityLine_001.png", nullptr);
         }
+
+        maxProgress = ThreadPool::sharedPool()->getJobCount();
+        ThreadPool::sharedPool()->finishQueue();
 
         // 8
         {
@@ -243,14 +241,7 @@ void __fastcall LoadingLayer_loadAssets_H(gd::LoadingLayer* self) {
             }
         }
 
-        maxProgress = loadCounter;
         *m_nLoadIndex = 14;
-    }
-
-    if(loadCounter > 0) {
-        ZoneScopedN("wait")
-        // load some stuff too while we're waiting for other stuff to load
-        ThreadPool::sharedPool()->tryExecuteJob();
     }
 
     {
@@ -275,11 +266,10 @@ void __fastcall LoadingLayer_loadAssets_H(gd::LoadingLayer* self) {
         }
         CCTexture2D::setDefaultAlphaPixelFormat(savedPixelFormat);
 
-        loadCounter -= loadedImages.size();
         loadedImages.clear();
     }
 
-    if(loadCounter <= 0) {
+    if(ThreadPool::sharedPool()->getJobCount() <= 0) {
         director->setDelegate((CCDirectorDelegate*)((uintptr_t)application + 0x98)); // idk what 98 is
         *(bool*)((uintptr_t)application + 0xa4) = true; // idk what a4 is either
         if(!*m_bFromRefresh)
@@ -287,12 +277,12 @@ void __fastcall LoadingLayer_loadAssets_H(gd::LoadingLayer* self) {
         self->openMenuLayer();
     }
     else {
-        ZoneScopedN("frame")
+        ZoneScopedN("wait")
 
         auto m_fSliderGrooveXPos = (float*)((uintptr_t)self + 0x130);
         float sliderWidth = *m_fSliderGrooveXPos;
         *(bool*)((uintptr_t)self + 0x11d) = true;
-        float progress = (1.f - (float)loadCounter / maxProgress) * sliderWidth;
+        float progress = (1.f - (float)ThreadPool::sharedPool()->getJobCount() / maxProgress) * sliderWidth;
         if(progress <= sliderWidth)
             sliderWidth = progress;
         auto m_pSliderBar = (CCSprite**)((uintptr_t)self + 0x12c);

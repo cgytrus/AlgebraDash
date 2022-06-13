@@ -2,8 +2,6 @@
 #include "../../ThreadPool.hpp"
 
 constexpr size_t threadBatchCount = RENDER_THREAD_BATCH_COUNT;
-std::mutex jobCounterMutex;
-unsigned int jobCounter = 0;
 void (__thiscall* CCSpriteBatchNode_draw)(CCSpriteBatchNode*);
 void __fastcall CCSpriteBatchNode_draw_H(CCSpriteBatchNode* self) {
     ZoneScoped
@@ -23,10 +21,6 @@ void __fastcall CCSpriteBatchNode_draw_H(CCSpriteBatchNode* self) {
         CCObject** globalStart = children->data->arr;
         CCObject** globalEnd = globalStart + children->data->num;
         for(; globalStart < globalEnd; globalStart += 10) {
-            {
-                std::unique_lock<std::mutex> lock(jobCounterMutex);
-                ++jobCounter;
-            }
             threadPool->queueJob([globalStart, globalEnd] {
                 ZoneScopedN("update transforms job")
                 CCObject** currentStart = globalStart;
@@ -37,16 +31,11 @@ void __fastcall CCSpriteBatchNode_draw_H(CCSpriteBatchNode* self) {
                         continue;
                     sprite->updateTransform();
                 }
-                {
-                    std::unique_lock<std::mutex> lock(jobCounterMutex);
-                    --jobCounter;
-                }
             });
         }
+        threadPool->finishQueue();
+        threadPool->waitForAllJobs();
     }
-
-    while(jobCounter > 0)
-        threadPool->tryExecuteJob();
 
     auto m_blendFunc = (ccBlendFunc*)((uintptr_t)self + 0xf4);
     ccGLBlendFunc((*m_blendFunc).src, (*m_blendFunc).dst);
