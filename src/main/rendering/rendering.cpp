@@ -1,7 +1,6 @@
 #include "../../includes.h"
 #include "../../ThreadPool.hpp"
 
-constexpr size_t threadBatchCount = RENDER_THREAD_BATCH_COUNT;
 void (__thiscall* CCSpriteBatchNode_draw)(CCSpriteBatchNode*);
 void __fastcall CCSpriteBatchNode_draw_H(CCSpriteBatchNode* self) {
     ZoneScoped
@@ -20,11 +19,11 @@ void __fastcall CCSpriteBatchNode_draw_H(CCSpriteBatchNode* self) {
         CCArray* children = self->getChildren();
         CCObject** globalStart = children->data->arr;
         CCObject** globalEnd = globalStart + children->data->num;
-        for(; globalStart < globalEnd; globalStart += 10) {
+        for(; globalStart < globalEnd; globalStart += RENDER_THREAD_BATCH_COUNT) {
             threadPool->queueJob([globalStart, globalEnd] {
                 ZoneScopedN("update transforms job")
                 CCObject** currentStart = globalStart;
-                CCObject** currentEnd = globalStart + threadBatchCount;
+                CCObject** currentEnd = globalStart + RENDER_THREAD_BATCH_COUNT;
                 for(; currentStart < currentEnd && currentStart < globalEnd; ++currentStart) {
                     CCSprite* sprite = (CCSprite*)*currentStart;
                     if(!sprite)
