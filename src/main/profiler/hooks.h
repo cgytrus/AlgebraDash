@@ -64,6 +64,7 @@ PROFILER_HOOK_THIS_ARGS(GD + 0x11f420, void, gd, GJEffectManager, calculateLight
 //PROFILER_HOOK_THIS(GD + 0xebda0, void, gd, GameObject, FUN_004ebda0) // idk which class it's actually in
 PROFILER_HOOK_THIS_ARGS(GD + 0xeb3f0, void, gd, GameObject, addColorSpriteToParent, (self, idk), bool idk)
 PROFILER_HOOK_THIS_ARGS(GD + 0x2531f0, void, gd, GameObject, updateChildSpriteColor, (self, idk), int idk) // actually in AnimatedGameObject
+PROFILER_HOOK_THIS_ARGS(GD + 0xee620, void, gd, GameObject, setObjectColor, (self, color), ccColor3B* color)
 
 PROFILER_HOOK_THIS_ARGS(GD + 0xc9d30, bool, gd, GameManager, getGameVariable, (self, key), const char* key)
 PROFILER_HOOK_THIS_ARGS(GD + 0xc9b50, void, gd, GameManager, setGameVariable, (self, key, value), const char* key, bool value)

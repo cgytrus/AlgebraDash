@@ -4,6 +4,7 @@
 #include "profiler/profiler.h"
 
 #include "loading/loading.h"
+#include "playLayerUpdateVisibility/playLayerUpdateVisibility.h"
 #include "rendering/rendering.h"
 
 #define DEBUG
@@ -27,6 +28,7 @@ DWORD WINAPI mainThread(void* hModule) {
 
     initThreadPool(cocos2dBase);
     initLoadingOptimizations(base);
+    //initPlayLayerUpdateVisibilityOptimizations(base);
     initRenderingOptimizations(cocos2dBase);
 
     MH_EnableHook(MH_ALL_HOOKS);
