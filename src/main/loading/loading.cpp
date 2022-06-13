@@ -251,8 +251,10 @@ void __fastcall LoadingLayer_loadAssets_H(gd::LoadingLayer* self) {
         auto savedPixelFormat = CCTexture2D::defaultAlphaPixelFormat();
         for(auto loadedImage : loadedImages) {
             auto texture = new CCTexture2D();
-            if(!texture)
+            if(!texture) {
+                CC_SAFE_RELEASE(loadedImage.image);
                 continue;
+            }
             CCTexture2D::setDefaultAlphaPixelFormat(loadedImage.pixelFormat < 0 ? savedPixelFormat : loadedImage.pixelFormat);
             if(texture->initWithImage(loadedImage.image)) {
                 auto m_pTextures = (CCDictionary**)((uintptr_t)textureCache + 0x20);
@@ -263,6 +265,7 @@ void __fastcall LoadingLayer_loadAssets_H(gd::LoadingLayer* self) {
             if(loadedImage.callback)
                 loadedImage.callback(texture);
             texture->release();
+            CC_SAFE_RELEASE(loadedImage.image);
         }
         CCTexture2D::setDefaultAlphaPixelFormat(savedPixelFormat);
 
