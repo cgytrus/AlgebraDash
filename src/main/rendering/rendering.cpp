@@ -14,8 +14,8 @@ void __fastcall CCSpriteBatchNode_draw_H(CCSpriteBatchNode* self) {
     shader->use();
     shader->setUniformsForBuiltins();
 
-    auto threadPool = ThreadPool::sharedPool();
     if(self->getChildrenCount() > 0) {
+        auto threadPool = ThreadPool::sharedPool();
         CCArray* children = self->getChildren();
         CCObject** globalStart = children->data->arr;
         CCObject** globalEnd = globalStart + children->data->num;

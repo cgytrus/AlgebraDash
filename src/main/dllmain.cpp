@@ -28,7 +28,7 @@ DWORD WINAPI mainThread(void* hModule) {
 
     initThreadPool(cocos2dBase);
     initLoadingOptimizations(base);
-    //initPlayLayerUpdateVisibilityOptimizations(base);
+    //initPlayLayerUpdateVisibilityOptimizations(base, cocos2dBase);
     initRenderingOptimizations(cocos2dBase);
 
     MH_EnableHook(MH_ALL_HOOKS);

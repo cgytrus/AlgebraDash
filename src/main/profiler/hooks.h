@@ -66,6 +66,10 @@ PROFILER_HOOK_THIS_ARGS(GD + 0xeb3f0, void, gd, GameObject, addColorSpriteToPare
 PROFILER_HOOK_THIS_ARGS(GD + 0x2531f0, void, gd, GameObject, updateChildSpriteColor, (self, idk), int idk) // actually in AnimatedGameObject
 PROFILER_HOOK_THIS_ARGS(GD + 0xee620, void, gd, GameObject, setObjectColor, (self, color), ccColor3B* color)
 
+PROFILER_HOOK_THIS(GD + 0xd1870, void, gd, GameObject, activateObject)
+PROFILER_HOOK_THIS_ARGS(GD + 0xef0e0, void, gd, GameObject, activateObject_p, (self, idk), void* idk)
+PROFILER_HOOK_THIS_ARGS(GD + 0xd19b0, void, gd, GameObject, deactivateObject, (self, idk), bool idk)
+
 PROFILER_HOOK_THIS_ARGS(GD + 0xc9d30, bool, gd, GameManager, getGameVariable, (self, key), const char* key)
 PROFILER_HOOK_THIS_ARGS(GD + 0xc9b50, void, gd, GameManager, setGameVariable, (self, key, value), const char* key, bool value)
 
@@ -186,7 +190,9 @@ PROFILER_HOOK_THIS(COCOS2D + 0xd4f40, void, cocos2d, CCSprite, updateTransform)
 PROFILER_HOOK_THIS(COCOS2D + 0xd3650, void, cocos2d, CCSprite, draw)
 PROFILER_HOOK_THIS(COCOS2D + 0xd3560, CCSpriteFrame*, cocos2d, CCSprite, displayFrame)
 PROFILER_HOOK_THIS(COCOS2D + 0xd5bd0, void, cocos2d, CCSpriteBatchNode, draw)
-PROFILER_HOOK_THIS_ARGS(COCOS2D + 0xd68f0, void, cocos2d, CCSpriteBatchNode, swap, (self, idk1, idk2), int idk1, int idk2)
+PROFILER_HOOK_THIS(COCOS2D + 0xd6750, void, cocos2d, CCSpriteBatchNode, sortAllChildren)
+PROFILER_HOOK_THIS_ARGS(COCOS2D + 0xd69d0, void, cocos2d, CCSpriteBatchNode, updateAtlastIndex, (self, sprite, curIndex), CCSprite* sprite, int* curIndex)
+PROFILER_HOOK_THIS_ARGS(COCOS2D + 0xd68f0, void, cocos2d, CCSpriteBatchNode, swap, (self, oldIndex, newIndex), int oldIndex, int newIndex)
 
 PROFILER_HOOK_THIS_ARGS(COCOS2D + 0x9fb60, void, cocos2d, CCLabelBMFont, setString, (self, str, needUpdateLabel), const char* str, bool needUpdateLabel)
 PROFILER_HOOK_THIS(COCOS2D + 0x9fd60, void, cocos2d, CCLabelBMFont, updateLabel)
