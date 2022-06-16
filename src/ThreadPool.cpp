@@ -113,8 +113,8 @@ bool __fastcall CCEGLView_windowShouldClose_H(CCEGLView* self) {
     return shouldClose;
 }
 
-void initThreadPool(uintptr_t cocos2dBase) {
-    MH_CreateHook(reinterpret_cast<void*>(cocos2dBase + 0xc4c60),
+void initThreadPool(HMODULE cocos2dModule) {
+    MH_CreateHook(reinterpret_cast<void*>(GetProcAddress(cocos2dModule, "?windowShouldClose@CCEGLView@cocos2d@@QAE_NXZ")),
         reinterpret_cast<void*>(&CCEGLView_windowShouldClose_H),
         reinterpret_cast<void**>(&CCEGLView_windowShouldClose));
 }

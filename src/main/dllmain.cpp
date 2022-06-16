@@ -24,12 +24,14 @@ DWORD WINAPI mainThread(void* hModule) {
 #endif
 
     auto base = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
-    auto cocos2dBase = reinterpret_cast<uintptr_t>(GetModuleHandle("libcocos2d.dll"));
 
-    initThreadPool(cocos2dBase);
+    auto cocos2dModule = GetModuleHandle("libcocos2d.dll");
+    auto cocos2dBase = reinterpret_cast<uintptr_t>(cocos2dModule);
+
+    initThreadPool(cocos2dModule);
     initLoadingOptimizations(base);
     //initPlayLayerUpdateVisibilityOptimizations(base, cocos2dBase);
-    initRenderingOptimizations(cocos2dBase);
+    initRenderingOptimizations(cocos2dModule);
 
     MH_EnableHook(MH_ALL_HOOKS);
 

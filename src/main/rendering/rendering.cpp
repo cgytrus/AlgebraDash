@@ -42,8 +42,8 @@ void __fastcall CCSpriteBatchNode_draw_H(CCSpriteBatchNode* self) {
 }
 
 #include "rendering.h"
-void initRenderingOptimizations(uintptr_t cocos2dBase) {
-    MH_CreateHook(reinterpret_cast<void*>(cocos2dBase + 0xd5bd0),
+void initRenderingOptimizations(HMODULE cocos2dModule) {
+    MH_CreateHook(reinterpret_cast<void*>(GetProcAddress(cocos2dModule, "?draw@CCSpriteBatchNode@cocos2d@@UAEXXZ")),
         reinterpret_cast<void*>(&CCSpriteBatchNode_draw_H),
         reinterpret_cast<void**>(&CCSpriteBatchNode_draw));
 }

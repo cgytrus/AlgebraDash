@@ -1,2 +1,2 @@
 #pragma once
-void initRenderingOptimizations(uintptr_t cocos2dBase);
+void initRenderingOptimizations(HMODULE cocos2dModule);
