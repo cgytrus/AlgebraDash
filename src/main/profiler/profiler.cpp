@@ -4,10 +4,6 @@
 #include "../../patcher.h"
 #include <memory>
 
-#define HOOK(address, name) MH_CreateHook(reinterpret_cast<void*>(address), \
-    reinterpret_cast<void*>(&##name##_H), \
-    reinterpret_cast<void**>(&name))
-
 void initTracyHooks();
 int (__thiscall* CCApplication_setupVerticalSync)(CCApplication*);
 int __fastcall CCApplication_setupVerticalSync_H(CCApplication* self) {
@@ -24,16 +20,22 @@ bool __fastcall CCEGLView_swapBuffers_H(CCEGLView* self) {
     return ret;
 }
 
-#define GD 0
-#define COCOS2D 0
-#define PROFILER_HOOK(address, displayName, ret, callConv, callConvH, name, args, argsH, argsC) ret (callConv* name)##args##; \
-ret callConvH name##_H##argsH { \
-    ZoneScopedN(#displayName) \
-    return name####argsC; \
+#define GD base
+#define COCOS2D cocos2dBase
+#define COCOS2DSYM(name) GetProcAddress(cocos2dModule, name)
+
+#define PROFILER_HOOK(address, name, ret, callConvO, callConvH, argsO, argsH, argsC) \
+ret (callConvO* TracyConcat(profilerHook_, __LINE__)##_O)argsO; \
+ret callConvH TracyConcat(profilerHook_, __LINE__)##_H##argsH { \
+    ZoneScopedN(#name) \
+    return TracyConcat(profilerHook_, __LINE__)##_O##argsC; \
+} \
+inline void TracyConcat(initProfilerHook_, __LINE__)(uintptr_t GD, HMODULE cocos2dModule, uintptr_t COCOS2D) { \
+    MH_CreateHook(reinterpret_cast<void*>(address), \
+        reinterpret_cast<void*>(&TracyConcat(profilerHook_, __LINE__)##_H), \
+        reinterpret_cast<void**>(&TracyConcat(profilerHook_, __LINE__)##_O)); \
 }
 #include "hooks.h"
-#undef GD
-#undef COCOS2D
 #undef PROFILER_HOOK
 
 #ifdef PROFILE_MEMORY
@@ -128,15 +130,17 @@ void* __cdecl reallocHook(void* memory, size_t newSize) {
 
 #endif
 
-#define GD base
-#define COCOS2D cocos2dBase
-#define PROFILER_HOOK(address, displayName, ret, callConv, callConvH, name, args, argsH, argsC) HOOK(address, name);
+#define PROFILER_HOOK(address, name, ret, callConvO, callConvH, argsO, argsH, argsC) TracyConcat(initProfilerHook_, __LINE__)(GD, cocos2dModule, COCOS2D);
 void initTracyHooks() {
     auto GD = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
-    auto COCOS2D = reinterpret_cast<uintptr_t>(GetModuleHandle("libcocos2d.dll"));
+
+    auto cocos2dModule = GetModuleHandle("libcocos2d.dll");
+    auto COCOS2D = reinterpret_cast<uintptr_t>(cocos2dModule);
 
     // frame
-    HOOK(COCOS2D + 0xc48b0, CCEGLView_swapBuffers);
+    MH_CreateHook(reinterpret_cast<void*>(COCOS2D + 0xc48b0),
+        reinterpret_cast<void*>(&CCEGLView_swapBuffers_H),
+        reinterpret_cast<void**>(&CCEGLView_swapBuffers));
 
     #include "hooks.h"
 
@@ -156,13 +160,12 @@ void initTracyHooks() {
 
     MH_EnableHook(MH_ALL_HOOKS);
 }
-#undef GD
-#undef COCOS2D
-#undef PROFILER_HOOK
 
 void initProfiler() {
     auto address = reinterpret_cast<uintptr_t>(GetModuleHandle("libcocos2d.dll")) + 0xc1c20;
-    HOOK(address, CCApplication_setupVerticalSync);
+    MH_CreateHook(reinterpret_cast<void*>(address),
+        reinterpret_cast<void*>(&CCApplication_setupVerticalSync_H),
+        reinterpret_cast<void**>(&CCApplication_setupVerticalSync));
     MH_EnableHook(reinterpret_cast<void*>(address));
 }
 
