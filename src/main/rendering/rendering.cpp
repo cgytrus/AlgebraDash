@@ -5,8 +5,7 @@ void (__thiscall* CCSpriteBatchNode_draw)(CCSpriteBatchNode*);
 void __fastcall CCSpriteBatchNode_draw_H(CCSpriteBatchNode* self) {
     ZoneScoped
 
-    auto m_pobTextureAtlas = (CCTextureAtlas**)((uintptr_t)self + 0xf0);
-    if((*m_pobTextureAtlas)->getTotalQuads() == 0)
+    if(self->getTextureAtlas()->getTotalQuads() == 0)
         return;
 
     auto shader = self->getShaderProgram();
@@ -36,10 +35,10 @@ void __fastcall CCSpriteBatchNode_draw_H(CCSpriteBatchNode* self) {
         threadPool->waitForAllJobs();
     }
 
-    auto m_blendFunc = (ccBlendFunc*)((uintptr_t)self + 0xf4);
-    ccGLBlendFunc((*m_blendFunc).src, (*m_blendFunc).dst);
+    auto blendFunc = self->getBlendFunc();
+    ccGLBlendFunc(blendFunc.src, blendFunc.dst);
 
-    (*m_pobTextureAtlas)->drawQuads();
+    self->getTextureAtlas()->drawQuads();
 }
 
 #include "rendering.h"
