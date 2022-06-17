@@ -1,0 +1,15 @@
+{
+    "geode": "v0.1.0",
+    "version": "v0.0.1",
+    "id": "com.cgytrus.algebradash",
+    "name": "AlgebraDash",
+    "developer": "ConfiG",
+    "description": "A general optimization mod.",
+    "binary": "AlgebraDash",
+    "dependencies": [
+        {
+            "id": "com.geode.api",
+            "required": true
+        }
+    ]
+}

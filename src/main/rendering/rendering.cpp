@@ -1,49 +1,46 @@
-#include "../../includes.h"
+#include <Tracy.hpp>
+#include <Geode.hpp>
+USE_GEODE_NAMESPACE();
+
 #include "../../ThreadPool.hpp"
 
-void (__thiscall* CCSpriteBatchNode_draw)(CCSpriteBatchNode*);
-void __fastcall CCSpriteBatchNode_draw_H(CCSpriteBatchNode* self) {
-    ZoneScoped
+class $modify(CCSpriteBatchNode) {
+    void draw() {
+        ZoneScoped
 
-    if(self->getTextureAtlas()->getTotalQuads() == 0)
-        return;
+        if(getTextureAtlas()->getTotalQuads() == 0)
+            return;
 
-    auto shader = self->getShaderProgram();
-    ccGLEnable(self->getGLServerState());
-    shader->use();
-    shader->setUniformsForBuiltins();
+        auto shader = getShaderProgram();
+        ccGLEnable(getGLServerState());
+        shader->use();
+        shader->setUniformsForBuiltins();
 
-    if(self->getChildrenCount() > 0) {
-        auto threadPool = ThreadPool::sharedPool();
-        CCArray* children = self->getChildren();
-        CCObject** globalStart = children->data->arr;
-        CCObject** globalEnd = globalStart + children->data->num;
-        for(; globalStart < globalEnd; globalStart += RENDER_THREAD_BATCH_COUNT) {
-            threadPool->queueJob([globalStart, globalEnd] {
-                ZoneScopedN("update transforms job")
-                CCObject** currentStart = globalStart;
-                CCObject** currentEnd = globalStart + RENDER_THREAD_BATCH_COUNT;
-                for(; currentStart < currentEnd && currentStart < globalEnd; ++currentStart) {
-                    CCSprite* sprite = (CCSprite*)*currentStart;
-                    if(!sprite)
-                        continue;
-                    sprite->updateTransform();
-                }
-            });
+        if(getChildrenCount() > 0) {
+            auto threadPool = ThreadPool::sharedPool();
+            CCArray* children = getChildren();
+            CCObject** globalStart = children->data->arr;
+            CCObject** globalEnd = globalStart + children->data->num;
+            for(; globalStart < globalEnd; globalStart += RENDER_THREAD_BATCH_COUNT) {
+                threadPool->queueJob([globalStart, globalEnd] {
+                    ZoneScopedN("update transforms job")
+                    CCObject** currentStart = globalStart;
+                    CCObject** currentEnd = globalStart + RENDER_THREAD_BATCH_COUNT;
+                    for(; currentStart < currentEnd && currentStart < globalEnd; ++currentStart) {
+                        CCSprite* sprite = (CCSprite*)*currentStart;
+                        if(!sprite)
+                            continue;
+                        sprite->updateTransform();
+                    }
+                });
+            }
+            threadPool->finishQueue();
+            threadPool->waitForAllJobs();
         }
-        threadPool->finishQueue();
-        threadPool->waitForAllJobs();
+
+        auto blendFunc = getBlendFunc();
+        ccGLBlendFunc(blendFunc.src, blendFunc.dst);
+
+        getTextureAtlas()->drawQuads();
     }
-
-    auto blendFunc = self->getBlendFunc();
-    ccGLBlendFunc(blendFunc.src, blendFunc.dst);
-
-    self->getTextureAtlas()->drawQuads();
-}
-
-#include "rendering.h"
-void initRenderingOptimizations(HMODULE cocos2dModule) {
-    MH_CreateHook(reinterpret_cast<void*>(GetProcAddress(cocos2dModule, "?draw@CCSpriteBatchNode@cocos2d@@UAEXXZ")),
-        reinterpret_cast<void*>(&CCSpriteBatchNode_draw_H),
-        reinterpret_cast<void**>(&CCSpriteBatchNode_draw));
-}
+};

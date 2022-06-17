@@ -1,4 +1,7 @@
-#include "../../includes.h"
+#include <Tracy.hpp>
+#include <Geode.hpp>
+USE_GEODE_NAMESPACE();
+
 #include "../../ThreadPool.hpp"
 #include <mutex>
 
@@ -86,235 +89,208 @@ void addFont(CCTextureCache* textureCache, const char* fontFile) {
     addImage(textureCache, fontConf->getAtlasName(), nullptr);
 }
 
-class CCContentManager : public CCObject {
-public:
-    static CCContentManager* sharedManager();
-    CCDictionary* addDict(const char* name, bool);
-};
-
 int maxProgress = 0;
-void load(gd::LoadingLayer* self) {
-    ZoneScoped
-    auto textureCache = CCTextureCache::sharedTextureCache();
+class $modify(LoadingLayer) {
+    void load() {
+        ZoneScoped
+        auto textureCache = CCTextureCache::sharedTextureCache();
 
-    // 1
-    {
-        ZoneScopedN("load assets 1")
-        addImage(textureCache, "GJ_GameSheet.png", "GJ_GameSheet.plist");
-    }
+        // 1
+        {
+            ZoneScopedN("load assets 1")
+            addImage(textureCache, "GJ_GameSheet.png", "GJ_GameSheet.plist");
+        }
 
-    // 2
-    {
-        ZoneScopedN("load assets 2")
-        addImage(textureCache, "GJ_GameSheet02.png", "GJ_GameSheet02.plist");
-    }
+        // 2
+        {
+            ZoneScopedN("load assets 2")
+            addImage(textureCache, "GJ_GameSheet02.png", "GJ_GameSheet02.plist");
+        }
 
-    // 3
-    {
-        ZoneScopedN("load assets 3")
-        addImage(textureCache, "GJ_GameSheet03.png", "GJ_GameSheet03.plist");
-    }
+        // 3
+        {
+            ZoneScopedN("load assets 3")
+            addImage(textureCache, "GJ_GameSheet03.png", "GJ_GameSheet03.plist");
+        }
 
-    // 4
-    {
-        ZoneScopedN("load assets 4")
-        addImage(textureCache, "GJ_GameSheet04.png", "GJ_GameSheet04.plist");
-    }
+        // 4
+        {
+            ZoneScopedN("load assets 4")
+            addImage(textureCache, "GJ_GameSheet04.png", "GJ_GameSheet04.plist");
+        }
 
-    // 5
-    {
-        ZoneScopedN("load assets 5")
-        addImage(textureCache, "GJ_GameSheetGlow.png", "GJ_GameSheetGlow.plist");
-        addImage(textureCache, "FireSheet_01.png", "FireSheet_01.plist");
-        addImage(textureCache, "GJ_ShopSheet.png", "GJ_ShopSheet.plist");
-        addImage(textureCache, "smallDot.png", nullptr);
-        addImage(textureCache, "square02_001.png", nullptr);
-    }
+        // 5
+        {
+            ZoneScopedN("load assets 5")
+            addImage(textureCache, "GJ_GameSheetGlow.png", "GJ_GameSheetGlow.plist");
+            addImage(textureCache, "FireSheet_01.png", "FireSheet_01.plist");
+            addImage(textureCache, "GJ_ShopSheet.png", "GJ_ShopSheet.plist");
+            addImage(textureCache, "smallDot.png", nullptr);
+            addImage(textureCache, "square02_001.png", nullptr);
+        }
 
-    // 6
-    {
-        ZoneScopedN("load assets 6")
-        auto useRobtopDumbFormatForColorPicker = *(bool*)((uintptr_t)CCApplication::sharedApplication() + 0xa7);
-        addImage(textureCache, "CCControlColourPickerSpriteSheet.png", "CCControlColourPickerSpriteSheet.plist",
-            useRobtopDumbFormatForColorPicker ? kCCTexture2DPixelFormat_DontChange : CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
-        addImage(textureCache, "GJ_gradientBG.png", nullptr, CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
-        addImage(textureCache, "edit_barBG_001.png", nullptr, CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
-        addImage(textureCache, "GJ_button_01.png", nullptr, CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
-        addImage(textureCache, "slidergroove2.png", nullptr, CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
-        addImage(textureCache, "sliderBar2.png", nullptr, CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
-    }
+        // 6
+        {
+            ZoneScopedN("load assets 6")
+            auto useRobtopDumbFormatForColorPicker = *(bool*)((uintptr_t)CCApplication::sharedApplication() + 0xa7);
+            addImage(textureCache, "CCControlColourPickerSpriteSheet.png", "CCControlColourPickerSpriteSheet.plist",
+                useRobtopDumbFormatForColorPicker ? kCCTexture2DPixelFormat_DontChange : CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
+            addImage(textureCache, "GJ_gradientBG.png", nullptr, CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
+            addImage(textureCache, "edit_barBG_001.png", nullptr, CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
+            addImage(textureCache, "GJ_button_01.png", nullptr, CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
+            addImage(textureCache, "slidergroove2.png", nullptr, CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
+            addImage(textureCache, "sliderBar2.png", nullptr, CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
+        }
 
-    // 7
-    {
-        ZoneScopedN("load assets 7")
-        addImage(textureCache, "GJ_square01.png", nullptr);
-        addImage(textureCache, "GJ_square02.png", nullptr);
-        addImage(textureCache, "GJ_square03.png", nullptr);
-        addImage(textureCache, "GJ_square04.png", nullptr);
-        addImage(textureCache, "GJ_square05.png", nullptr);
-        addImage(textureCache, "gravityLine_001.png", nullptr);
-    }
+        // 7
+        {
+            ZoneScopedN("load assets 7")
+            addImage(textureCache, "GJ_square01.png", nullptr);
+            addImage(textureCache, "GJ_square02.png", nullptr);
+            addImage(textureCache, "GJ_square03.png", nullptr);
+            addImage(textureCache, "GJ_square04.png", nullptr);
+            addImage(textureCache, "GJ_square05.png", nullptr);
+            addImage(textureCache, "gravityLine_001.png", nullptr);
+        }
 
-    // 8
-    {
-        ZoneScopedN("load assets 8")
-        addFont(textureCache, "chatFont.fnt");
+        // 8
+        {
+            ZoneScopedN("load assets 8")
+            addFont(textureCache, "chatFont.fnt");
 
-        maxProgress = ThreadPool::sharedPool()->getJobCount();
-        ThreadPool::sharedPool()->finishQueue();
+            maxProgress = ThreadPool::sharedPool()->getJobCount();
+            ThreadPool::sharedPool()->finishQueue();
 
-        // addFont doesn't work with these 2 for some reason
-        CCLabelBMFont::create(" ", "goldFont.fnt");
-        CCLabelBMFont::create(" ", "bigFont.fnt");
-    }
+            // addFont doesn't work with these 2 for some reason
+            CCLabelBMFont::create(" ", "goldFont.fnt");
+            CCLabelBMFont::create(" ", "bigFont.fnt");
+        }
 
-    // 9
-    {
-        ZoneScopedN("load assets 9")
-        class ObjectManager;
-        class CCAnimateFrameCache;
+        // 9
+        {
+            ZoneScopedN("load assets 9")
 
-        // ObjectManager::sharedObjectManager
-        auto objectManager = reinterpret_cast<ObjectManager* (__cdecl*)()>(gd::base + 0x2c2c0)();
-        // idk what's this one probably some init or smth too lazy to figure out
-        reinterpret_cast<void (__thiscall*)(ObjectManager*)>(gd::base + 0x2c3b0)(objectManager);
+            ObjectManager::instance()->setup();
+            CCAnimateFrameCache::sharedSpriteFrameCache()->addSpriteFramesWithFile("Robot_AnimDesc.plist");
 
-        // CCAnimateFrameCache::sharedAnimateFrameCache
-        auto animateFrameCache = reinterpret_cast<CCAnimateFrameCache* (__cdecl*)()>(gd::base + 0x158f0)();
-        // CCAnimateFrameCache::addAnimation?
-        reinterpret_cast<void (__thiscall*)(CCAnimateFrameCache*, const char*)>(gd::base + 0x159b0)(animateFrameCache, "Robot_AnimDesc.plist");
+            auto contentManager = CCContentManager::sharedManager();
+            contentManager->addDict("glassDestroy01.plist", false);
+            contentManager->addDict("coinPickupEffect.plist", false);
+            contentManager->addDict("explodeEffect.plist", false);
 
-        auto contentManager = CCContentManager::sharedManager();
-        contentManager->addDict("glassDestroy01.plist", false);
-        contentManager->addDict("coinPickupEffect.plist", false);
-        contentManager->addDict("explodeEffect.plist", false);
+            AchievementManager::sharedState();
+            ObjectToolbox::sharedState();
+        }
 
-        gd::AchievementManager::sharedState();
-        gd::ObjectToolbox::sharedState();
-    }
+        // 10
+        // it does nothing lol
 
-    // 10
-    // it does nothing lol
+        // 11
+        // what.
+        {
+            ZoneScopedN("load assets 11")
+            auto gameManager = GameManager::sharedState();
+            if(gameManager->m_clickedEditor && !m_fromRefresh)
+                gameManager->m_showProgressBar = true;
+        }
 
-    // 11
-    // what.
-    {
-        ZoneScopedN("load assets 11")
-        auto gameManager = gd::GameManager::sharedState();
-        if(gameManager->m_bClickedEditor && !self->m_bFromRefresh)
-            gameManager->m_bShowProgressBar = true;
-    }
+        // 12
+        {
+            ZoneScopedN("load assets 12")
+            CCTextInputNode::create(200.f, 50.f, "Temp", 24, "bigFont.fnt");
+        }
 
-    // 12
-    {
-        ZoneScopedN("load assets 12")
-        gd::CCTextInputNode::create("Temp", self, "bigFont.fnt", 200.f, 50.f);
-    }
-
-    // 13
-    {
-        ZoneScopedN("load assets 13")
-        if(!self->m_bFromRefresh) {
-            auto circleWave = gd::CCCircleWave::create(true, true, 10.f, 5.f, 0.3f);
-            self->addChild(circleWave);
-            auto idk = CCPoint(-100.f, -100.f);
-            circleWave->idk(&idk);
+        // 13
+        {
+            ZoneScopedN("load assets 13")
+            if(!m_fromRefresh) {
+                auto circleWave = CCCircleWave::create(10.f, 5.f, 0.3f, true, true);
+                addChild(circleWave);
+                circleWave->setPosition(CCPoint(-100.f, -100.f));
+            }
         }
     }
-}
 
-void finishLoading(gd::LoadingLayer* self) {
-    ZoneScopedN("load assets 14")
+    void finishLoading() {
+        ZoneScopedN("load assets 14")
 
-    auto application = CCApplication::sharedApplication();
-    CCDirector::sharedDirector()->setDelegate((CCDirectorDelegate*)((uintptr_t)application + 0x98)); // idk what 98 is
-    *(bool*)((uintptr_t)application + 0xa4) = true; // idk what a4 is either
+        auto application = CCApplication::sharedApplication();
+        CCDirector::sharedDirector()->setDelegate((CCDirectorDelegate*)((uintptr_t)application + 0x98)); // idk what 98 is
+        *(bool*)((uintptr_t)application + 0xa4) = true; // idk what a4 is either
 
-    if(!self->m_bFromRefresh)
-        gd::GameManager::sharedState()->fadeInMusic("menuLoop.mp3");
+        if(!m_fromRefresh)
+            GameManager::sharedState()->fadeInMusic("menuLoop.mp3");
 
-    self->loadingFinished();
-}
+        loadingFinished();
+    }
 
-void finishAddImage() {
-    ZoneScoped
-    std::unique_lock<std::mutex> lock(loadedImagesMutex);
+    void finishAddImage() {
+        ZoneScoped
+        std::unique_lock<std::mutex> lock(loadedImagesMutex);
 
-    auto textureCache = CCTextureCache::sharedTextureCache();
-    auto spriteFrameCache = CCSpriteFrameCache::sharedSpriteFrameCache();
+        auto textureCache = CCTextureCache::sharedTextureCache();
+        auto spriteFrameCache = CCSpriteFrameCache::sharedSpriteFrameCache();
 
-    auto savedPixelFormat = CCTexture2D::defaultAlphaPixelFormat();
-    for(auto loadedImage : loadedImages) {
-        auto texture = new CCTexture2D();
-        if(!texture) {
+        auto savedPixelFormat = CCTexture2D::defaultAlphaPixelFormat();
+        for(auto loadedImage : loadedImages) {
+            auto texture = new CCTexture2D();
+            if(!texture) {
+                CC_SAFE_RELEASE(loadedImage.image);
+                continue;
+            }
+
+            CCTexture2D::setDefaultAlphaPixelFormat(loadedImage.pixelFormat < 0 ? savedPixelFormat : loadedImage.pixelFormat);
+            if(texture->initWithImage(loadedImage.image)) {
+                auto textures = *(CCDictionary**)((uintptr_t)textureCache + 0x20);
+                textures->setObject(texture, loadedImage.pathKey.c_str());
+                if(loadedImage.plistPath)
+                    spriteFrameCache->addSpriteFramesWithFile(loadedImage.plistPath, texture);
+            }
+
+            texture->release();
             CC_SAFE_RELEASE(loadedImage.image);
-            continue;
+        }
+        CCTexture2D::setDefaultAlphaPixelFormat(savedPixelFormat);
+
+        loadedImages.clear();
+    }
+
+    void updateProgressBar() {
+        ZoneScoped
+        auto sliderX = m_sliderGrooveXPos;
+
+        m_unknown2 = true;
+
+        float progress = (1.f - (float)ThreadPool::sharedPool()->getJobCount() / maxProgress) * sliderX;
+        if(progress <= sliderX)
+            sliderX = progress;
+
+        m_sliderBar->setTextureRect({ 0.f, 0.f, sliderX, m_sliderGrooveHeight });
+    }
+
+    void runLoadAssets() {
+        ZoneScoped
+        CCCallFunc* callFunc = CCCallFunc::create(this, callfunc_selector(LoadingLayer::loadAssets));
+        CCDelayTime* delayTime = CCDelayTime::create(0.f);
+        CCSequence* sequence = CCSequence::create(delayTime, callFunc, nullptr);
+        GameManager::sharedState()->getActionManager()->addAction(sequence, this, false);
+    }
+
+    void loadAssets() {
+        ZoneScoped
+        if(m_loadStep <= 0) {
+            load();
+            m_loadStep = 14;
         }
 
-        CCTexture2D::setDefaultAlphaPixelFormat(loadedImage.pixelFormat < 0 ? savedPixelFormat : loadedImage.pixelFormat);
-        if(texture->initWithImage(loadedImage.image)) {
-            auto textures = *(CCDictionary**)((uintptr_t)textureCache + 0x20);
-            textures->setObject(texture, loadedImage.pathKey.c_str());
-            if(loadedImage.plistPath)
-                spriteFrameCache->addSpriteFramesWithFile(loadedImage.plistPath, texture);
+        finishAddImage();
+
+        if(ThreadPool::sharedPool()->getJobCount() > 0) {
+            ZoneScopedN("wait")
+            updateProgressBar();
+            runLoadAssets();
         }
-
-        texture->release();
-        CC_SAFE_RELEASE(loadedImage.image);
+        else
+            finishLoading();
     }
-    CCTexture2D::setDefaultAlphaPixelFormat(savedPixelFormat);
-
-    loadedImages.clear();
-}
-
-void updateProgressBar(gd::LoadingLayer* self) {
-    ZoneScoped
-    auto sliderX = self->m_fSliderGrooveXPos;
-
-    self->unk11D = true;
-
-    float progress = (1.f - (float)ThreadPool::sharedPool()->getJobCount() / maxProgress) * sliderX;
-    if(progress <= sliderX)
-        sliderX = progress;
-
-    self->m_pSliderBar->setTextureRect({ 0.f, 0.f, sliderX, self->m_fSliderGrooveHeight });
-}
-
-void runLoadAssets(gd::LoadingLayer* self) {
-    ZoneScoped
-    union {
-        uintptr_t ptr;
-        SEL_CallFunc selector;
-    } loadAssets = { gd::base + 0x18c8e0 };
-
-    CCCallFunc* callFunc = CCCallFunc::create(self, loadAssets.selector);
-    CCDelayTime* delayTime = CCDelayTime::create(0.f);
-    CCSequence* sequence = CCSequence::create(delayTime, callFunc, nullptr);
-    gd::GameManager::sharedState()->getActionManager()->addAction(sequence, self, false);
-}
-
-void (__thiscall* LoadingLayer_loadAssets)(gd::LoadingLayer*);
-void __fastcall LoadingLayer_loadAssets_H(gd::LoadingLayer* self) {
-    ZoneScoped
-    if(self->m_nLoadStep <= 0) {
-        load(self);
-        self->m_nLoadStep = 14;
-    }
-
-    finishAddImage();
-
-    if(ThreadPool::sharedPool()->getJobCount() > 0) {
-        ZoneScopedN("wait")
-        updateProgressBar(self);
-        runLoadAssets(self);
-    }
-    else
-        finishLoading(self);
-}
-
-#include "loading.h"
-void initLoadingOptimizations(uintptr_t base) {
-    MH_CreateHook(reinterpret_cast<void*>(base + 0x18c8e0),
-        reinterpret_cast<void*>(&LoadingLayer_loadAssets_H),
-        reinterpret_cast<void**>(&LoadingLayer_loadAssets));
-}
+};

@@ -1,4 +1,4 @@
-#include "includes.h"
+#include <Tracy.hpp>
 #include "ThreadPool.hpp"
 
 static ThreadPool* _sharedPool;
@@ -90,31 +90,12 @@ size_t ThreadPool::getJobCount() {
     return jobCount;
 }
 
-bool _created = false;
-bool (__thiscall* CCEGLView_windowShouldClose)(CCEGLView*);
-bool __fastcall CCEGLView_windowShouldClose_H(CCEGLView* self) {
-    auto shouldClose = CCEGLView_windowShouldClose(self);
-    if(_created) {
-        if(shouldClose && ThreadPool::sharedPool()) {
-            ThreadPool::sharedPool()->stop();
-            delete _sharedPool;
-        }
-
-        return shouldClose;
-    }
-
-    if(shouldClose)
-        return shouldClose;
-
+void initThreadPool() {
     _sharedPool = new ThreadPool();
     ThreadPool::sharedPool()->start();
-    _created = true;
-
-    return shouldClose;
 }
 
-void initThreadPool(HMODULE cocos2dModule) {
-    MH_CreateHook(reinterpret_cast<void*>(GetProcAddress(cocos2dModule, "?windowShouldClose@CCEGLView@cocos2d@@QAE_NXZ")),
-        reinterpret_cast<void*>(&CCEGLView_windowShouldClose_H),
-        reinterpret_cast<void**>(&CCEGLView_windowShouldClose));
+void deinitThreadPool() {
+    ThreadPool::sharedPool()->stop();
+    delete _sharedPool;
 }

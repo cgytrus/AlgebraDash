@@ -34,4 +34,5 @@ private:
     std::condition_variable mutexCondition;
 };
 
-void initThreadPool(HMODULE cocos2dModule);
+void initThreadPool();
+void deinitThreadPool();
