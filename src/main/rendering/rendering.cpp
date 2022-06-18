@@ -4,6 +4,7 @@ USE_GEODE_NAMESPACE();
 
 #include "../../ThreadPool.hpp"
 
+// doesn't work because not in cocos2d bindings
 class $modify(CCSpriteBatchNode) {
     void draw() {
         ZoneScoped

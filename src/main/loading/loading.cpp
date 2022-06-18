@@ -276,6 +276,9 @@ class $modify(LoadingLayer) {
         GameManager::sharedState()->getActionManager()->addAction(sequence, this, false);
     }
 
+// it doesn't work on mac so
+// (cuz hardcoded offsets)
+#ifdef _WIN32
     void loadAssets() {
         ZoneScoped
         if(m_loadStep <= 0) {
@@ -293,4 +296,5 @@ class $modify(LoadingLayer) {
         else
             finishLoading();
     }
+#endif
 };

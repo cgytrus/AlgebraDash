@@ -17,14 +17,13 @@ class $modify(CCEGLView) {
 
 #define AD_STR(x) #x
 
-#define GD base
-#define COCOS2D cocos2dBase
-#define COCOS2DSYM(name) GetProcAddress(cocos2dModule, name)
+#define GD 0
+#define COCOS2D 0
 
 #define PROFILER_HOOK(ret, type, name, argsC, argsO) \
 class $modify(type) { \
     ret name##argsO { \
-        ZoneScopedN(AD_STR(type##name)) \
+        ZoneScopedN(AD_STR(type::name)) \
         return type::name##argsC; \
     } \
 };
@@ -125,6 +124,7 @@ void* __cdecl reallocHook(void* memory, size_t newSize) {
 
 void initProfiler() {
 #ifdef PROFILE_MEMORY
+#ifdef _WIN32
     auto GD = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
 
     auto cocos2dModule = GetModuleHandle("libcocos2d.dll");
@@ -141,6 +141,9 @@ void initProfiler() {
     patch(COCOS2D + 0x11d340, pointerToBytes(reinterpret_cast<uintptr_t>(&operatorDeleteArrayHook)));
     patch(COCOS2D + 0x11d344, pointerToBytes(reinterpret_cast<uintptr_t>(&operatorDeleteHook)));
     patch(COCOS2D + 0x11d348, pointerToBytes(reinterpret_cast<uintptr_t>(&operatorNewHook)));
+#else
+#pragma warning("memory profiling only works on windows atm")
+#endif
 #endif
 }
 
