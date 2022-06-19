@@ -1,4 +1,3 @@
-#include <Tracy.hpp>
 #include <Geode.hpp>
 USE_GEODE_NAMESPACE();
 

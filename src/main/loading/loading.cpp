@@ -278,7 +278,7 @@ class $modify(LoadingLayer) {
 
 // it doesn't work on mac so
 // (cuz hardcoded offsets)
-#ifdef _WIN32
+#ifdef GEODE_IS_WINDOWS
     void loadAssets() {
         ZoneScoped
         if(m_loadStep <= 0) {
