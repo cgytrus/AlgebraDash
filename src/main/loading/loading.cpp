@@ -7,164 +7,192 @@ USE_GEODE_NAMESPACE();
 
 const CCTexture2DPixelFormat kCCTexture2DPixelFormat_DontChange = (CCTexture2DPixelFormat)-1;
 
-struct LoadedImage {
-    CCImage* image;
-    const char* plistPath;
-    std::string pathKey;
-    CCTexture2DPixelFormat pixelFormat;
+class $modify(CCThreadedTextureCache, CCTextureCache) {
+    struct LoadedImage {
+        CCImage* image;
+        const char* plistPath;
+        std::string pathKey;
+        CCTexture2DPixelFormat pixelFormat;
+    };
+    field<std::mutex> loadedImagesMutex;
+    field<std::vector<LoadedImage>> loadedImages;
+    void addImageThread(const char* path, const char* plistPath, CCTexture2DPixelFormat pixelFormat = kCCTexture2DPixelFormat_DontChange) {
+        ZoneScoped
+
+        CCImage* pImage = nullptr;
+
+        std::string pathKey = path;
+        pathKey = CCFileUtils::sharedFileUtils()->fullPathForFilename(pathKey.c_str(), false);
+        if(pathKey.size() == 0)
+            return;
+
+        CCTexture2D* texture = (CCTexture2D*)m_pTextures->objectForKey(pathKey.c_str());
+        if(texture) {
+            {
+                std::unique_lock<std::mutex> lock(this->*loadedImagesMutex);
+                (this->*loadedImages).push_back({pImage, plistPath, pathKey, texture->getPixelFormat()});
+            }
+            return;
+        }
+
+        std::string fullpath = pathKey;
+        std::string lowerCase(pathKey);
+        for(unsigned int i = 0; i < lowerCase.length(); ++i)
+            lowerCase[i] = tolower(lowerCase[i]);
+
+        if(std::string::npos != lowerCase.find(".pvr")) {
+            addPVRImage(fullpath.c_str());
+            return;
+        }
+
+        if(std::string::npos != lowerCase.find(".pkm")) {
+            addETCImage(fullpath.c_str());
+            return;
+        }
+
+        CCImage::EImageFormat eImageFormat = CCImage::kFmtUnKnown;
+        if(std::string::npos != lowerCase.find(".png"))
+            eImageFormat = CCImage::kFmtPng;
+        else if(std::string::npos != lowerCase.find(".jpg") || std::string::npos != lowerCase.find(".jpeg"))
+            eImageFormat = CCImage::kFmtJpg;
+        else if(std::string::npos != lowerCase.find(".tif") || std::string::npos != lowerCase.find(".tiff"))
+            eImageFormat = CCImage::kFmtTiff;
+        else if(std::string::npos != lowerCase.find(".webp"))
+            eImageFormat = CCImage::kFmtWebp;
+
+        ThreadPool::sharedPool()->queueJob([this, fullpath, eImageFormat, pathKey, plistPath, pixelFormat] {
+            ZoneScopedN("init image job")
+
+            auto pImage = new CCImage();
+            if(!pImage)
+                return;
+
+            bool bRet = pImage->initWithImageFileThreadSafe(fullpath.c_str(), eImageFormat);
+            if(!bRet) {
+                pImage->release();
+                return;
+            }
+
+            {
+                std::unique_lock<std::mutex> lock(this->*loadedImagesMutex);
+                (this->*loadedImages).push_back({pImage, plistPath, pathKey, pixelFormat});
+            }
+        });
+    }
+
+    void addFontThread(const char* fontFile) {
+        ZoneScoped
+        auto fontConf = FNTConfigLoadFile(fontFile);
+        if(!fontConf)
+            return;
+        fontConf->retain();
+        addImageThread(fontConf->getAtlasName(), nullptr);
+    }
+
+    void finishAddImage() {
+        ZoneScoped
+        std::unique_lock<std::mutex> lock(this->*loadedImagesMutex);
+
+        auto spriteFrameCache = CCSpriteFrameCache::sharedSpriteFrameCache();
+
+        auto savedPixelFormat = CCTexture2D::defaultAlphaPixelFormat();
+        for(auto loadedImage : this->*loadedImages) {
+            auto texture = new CCTexture2D();
+            if(!texture) {
+                CC_SAFE_RELEASE(loadedImage.image);
+                continue;
+            }
+
+            CCTexture2D::setDefaultAlphaPixelFormat(loadedImage.pixelFormat < 0 ? savedPixelFormat : loadedImage.pixelFormat);
+            if(texture->initWithImage(loadedImage.image)) {
+                m_pTextures->setObject(texture, loadedImage.pathKey.c_str());
+                if(loadedImage.plistPath)
+                    spriteFrameCache->addSpriteFramesWithFile(loadedImage.plistPath, texture);
+            }
+
+            texture->release();
+            CC_SAFE_RELEASE(loadedImage.image);
+        }
+        CCTexture2D::setDefaultAlphaPixelFormat(savedPixelFormat);
+
+        (this->*loadedImages).clear();
+    }
 };
-std::mutex loadedImagesMutex;
-std::vector<LoadedImage> loadedImages;
-void addImage(CCTextureCache* self, const char* path, const char* plistPath, CCTexture2DPixelFormat pixelFormat = kCCTexture2DPixelFormat_DontChange) {
-    ZoneScoped
-
-    CCImage* pImage = nullptr;
-
-    std::string pathKey = path;
-    pathKey = CCFileUtils::sharedFileUtils()->fullPathForFilename(pathKey.c_str(), false);
-    if(pathKey.size() == 0)
-        return;
-
-    auto textures = *(CCDictionary**)((uintptr_t)self + 0x20);
-    CCTexture2D* texture = (CCTexture2D*)textures->objectForKey(pathKey.c_str());
-    if(texture) {
-        {
-            std::unique_lock<std::mutex> lock(loadedImagesMutex);
-            loadedImages.push_back({pImage, plistPath, pathKey, texture->getPixelFormat()});
-        }
-        return;
-    }
-
-    std::string fullpath = pathKey;
-    std::string lowerCase(pathKey);
-    for(unsigned int i = 0; i < lowerCase.length(); ++i)
-        lowerCase[i] = tolower(lowerCase[i]);
-
-    if(std::string::npos != lowerCase.find(".pvr")) {
-        self->addPVRImage(fullpath.c_str());
-        return;
-    }
-
-    if(std::string::npos != lowerCase.find(".pkm")) {
-        self->addETCImage(fullpath.c_str());
-        return;
-    }
-
-    CCImage::EImageFormat eImageFormat = CCImage::kFmtUnKnown;
-    if(std::string::npos != lowerCase.find(".png"))
-        eImageFormat = CCImage::kFmtPng;
-    else if(std::string::npos != lowerCase.find(".jpg") || std::string::npos != lowerCase.find(".jpeg"))
-        eImageFormat = CCImage::kFmtJpg;
-    else if(std::string::npos != lowerCase.find(".tif") || std::string::npos != lowerCase.find(".tiff"))
-        eImageFormat = CCImage::kFmtTiff;
-    else if(std::string::npos != lowerCase.find(".webp"))
-        eImageFormat = CCImage::kFmtWebp;
-
-    ThreadPool::sharedPool()->queueJob([self, fullpath, eImageFormat, pathKey, plistPath, pixelFormat] {
-        ZoneScopedN("init image job")
-
-        auto pImage = new CCImage();
-        if(!pImage)
-            return;
-
-        bool bRet = pImage->initWithImageFileThreadSafe(fullpath.c_str(), eImageFormat);
-        if(!bRet) {
-            pImage->release();
-            return;
-        }
-
-        {
-            std::unique_lock<std::mutex> lock(loadedImagesMutex);
-            loadedImages.push_back({pImage, plistPath, pathKey, pixelFormat});
-        }
-    });
-}
-
-void addFont(CCTextureCache* textureCache, const char* fontFile) {
-    ZoneScoped
-    auto fontConf = FNTConfigLoadFile(fontFile);
-    if(!fontConf)
-        return;
-    fontConf->retain();
-    addImage(textureCache, fontConf->getAtlasName(), nullptr);
-}
 
 int maxProgress = 0;
 class $modify(LoadingLayer) {
     void load() {
         ZoneScoped
-        auto textureCache = CCTextureCache::sharedTextureCache();
+        auto textureCache = reinterpret_cast<CCThreadedTextureCache*>(CCTextureCache::sharedTextureCache());
 
         // 1
         {
             ZoneScopedN("load assets 1")
-            addImage(textureCache, "GJ_GameSheet.png", "GJ_GameSheet.plist");
+            textureCache->addImageThread("GJ_GameSheet.png", "GJ_GameSheet.plist");
         }
 
         // 2
         {
             ZoneScopedN("load assets 2")
-            addImage(textureCache, "GJ_GameSheet02.png", "GJ_GameSheet02.plist");
+            textureCache->addImageThread("GJ_GameSheet02.png", "GJ_GameSheet02.plist");
         }
 
         // 3
         {
             ZoneScopedN("load assets 3")
-            addImage(textureCache, "GJ_GameSheet03.png", "GJ_GameSheet03.plist");
+            textureCache->addImageThread("GJ_GameSheet03.png", "GJ_GameSheet03.plist");
         }
 
         // 4
         {
             ZoneScopedN("load assets 4")
-            addImage(textureCache, "GJ_GameSheet04.png", "GJ_GameSheet04.plist");
+            textureCache->addImageThread("GJ_GameSheet04.png", "GJ_GameSheet04.plist");
         }
 
         // 5
         {
             ZoneScopedN("load assets 5")
-            addImage(textureCache, "GJ_GameSheetGlow.png", "GJ_GameSheetGlow.plist");
-            addImage(textureCache, "FireSheet_01.png", "FireSheet_01.plist");
-            addImage(textureCache, "GJ_ShopSheet.png", "GJ_ShopSheet.plist");
-            addImage(textureCache, "smallDot.png", nullptr);
-            addImage(textureCache, "square02_001.png", nullptr);
+            textureCache->addImageThread("GJ_GameSheetGlow.png", "GJ_GameSheetGlow.plist");
+            textureCache->addImageThread("FireSheet_01.png", "FireSheet_01.plist");
+            textureCache->addImageThread("GJ_ShopSheet.png", "GJ_ShopSheet.plist");
+            textureCache->addImageThread("smallDot.png", nullptr);
+            textureCache->addImageThread("square02_001.png", nullptr);
         }
 
         // 6
         {
             ZoneScopedN("load assets 6")
             auto useRobtopDumbFormatForColorPicker = *(bool*)((uintptr_t)CCApplication::sharedApplication() + 0xa7);
-            addImage(textureCache, "CCControlColourPickerSpriteSheet.png", "CCControlColourPickerSpriteSheet.plist",
+            textureCache->addImageThread("CCControlColourPickerSpriteSheet.png", "CCControlColourPickerSpriteSheet.plist",
                 useRobtopDumbFormatForColorPicker ? kCCTexture2DPixelFormat_DontChange : CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
-            addImage(textureCache, "GJ_gradientBG.png", nullptr, CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
-            addImage(textureCache, "edit_barBG_001.png", nullptr, CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
-            addImage(textureCache, "GJ_button_01.png", nullptr, CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
-            addImage(textureCache, "slidergroove2.png", nullptr, CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
-            addImage(textureCache, "sliderBar2.png", nullptr, CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
+            textureCache->addImageThread("GJ_gradientBG.png", nullptr, CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
+            textureCache->addImageThread("edit_barBG_001.png", nullptr, CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
+            textureCache->addImageThread("GJ_button_01.png", nullptr, CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
+            textureCache->addImageThread("slidergroove2.png", nullptr, CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
+            textureCache->addImageThread("sliderBar2.png", nullptr, CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
         }
 
         // 7
         {
             ZoneScopedN("load assets 7")
-            addImage(textureCache, "GJ_square01.png", nullptr);
-            addImage(textureCache, "GJ_square02.png", nullptr);
-            addImage(textureCache, "GJ_square03.png", nullptr);
-            addImage(textureCache, "GJ_square04.png", nullptr);
-            addImage(textureCache, "GJ_square05.png", nullptr);
-            addImage(textureCache, "gravityLine_001.png", nullptr);
+            textureCache->addImageThread("GJ_square01.png", nullptr);
+            textureCache->addImageThread("GJ_square02.png", nullptr);
+            textureCache->addImageThread("GJ_square03.png", nullptr);
+            textureCache->addImageThread("GJ_square04.png", nullptr);
+            textureCache->addImageThread("GJ_square05.png", nullptr);
+            textureCache->addImageThread("gravityLine_001.png", nullptr);
         }
 
         // 8
         {
             ZoneScopedN("load assets 8")
-            addFont(textureCache, "chatFont.fnt");
-
-            maxProgress = ThreadPool::sharedPool()->getJobCount();
-            ThreadPool::sharedPool()->finishQueue();
-
-            // addFont doesn't work with these 2 for some reason
-            CCLabelBMFont::create(" ", "goldFont.fnt");
-            CCLabelBMFont::create(" ", "bigFont.fnt");
+            textureCache->addFontThread("chatFont.fnt");
+            textureCache->addFontThread("goldFont.fnt");
+            textureCache->addFontThread("bigFont.fnt");
         }
+
+        maxProgress = ThreadPool::sharedPool()->getJobCount();
+        ThreadPool::sharedPool()->finishQueue();
 
         // 9
         {
@@ -224,37 +252,6 @@ class $modify(LoadingLayer) {
         loadingFinished();
     }
 
-    void finishAddImage() {
-        ZoneScoped
-        std::unique_lock<std::mutex> lock(loadedImagesMutex);
-
-        auto textureCache = CCTextureCache::sharedTextureCache();
-        auto spriteFrameCache = CCSpriteFrameCache::sharedSpriteFrameCache();
-
-        auto savedPixelFormat = CCTexture2D::defaultAlphaPixelFormat();
-        for(auto loadedImage : loadedImages) {
-            auto texture = new CCTexture2D();
-            if(!texture) {
-                CC_SAFE_RELEASE(loadedImage.image);
-                continue;
-            }
-
-            CCTexture2D::setDefaultAlphaPixelFormat(loadedImage.pixelFormat < 0 ? savedPixelFormat : loadedImage.pixelFormat);
-            if(texture->initWithImage(loadedImage.image)) {
-                auto textures = *(CCDictionary**)((uintptr_t)textureCache + 0x20);
-                textures->setObject(texture, loadedImage.pathKey.c_str());
-                if(loadedImage.plistPath)
-                    spriteFrameCache->addSpriteFramesWithFile(loadedImage.plistPath, texture);
-            }
-
-            texture->release();
-            CC_SAFE_RELEASE(loadedImage.image);
-        }
-        CCTexture2D::setDefaultAlphaPixelFormat(savedPixelFormat);
-
-        loadedImages.clear();
-    }
-
     void updateProgressBar() {
         ZoneScoped
         auto sliderX = m_sliderGrooveXPos;
@@ -286,7 +283,7 @@ class $modify(LoadingLayer) {
             m_loadStep = 14;
         }
 
-        finishAddImage();
+        reinterpret_cast<CCThreadedTextureCache*>(CCTextureCache::sharedTextureCache())->finishAddImage();
 
         if(ThreadPool::sharedPool()->getJobCount() > 0) {
             ZoneScopedN("wait")
