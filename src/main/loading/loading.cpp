@@ -159,14 +159,12 @@ void load(gd::LoadingLayer* self) {
     {
         ZoneScopedN("load assets 8")
         addFont(textureCache, "chatFont.fnt");
-
-        maxProgress = ThreadPool::sharedPool()->getJobCount();
-        ThreadPool::sharedPool()->finishQueue();
-
-        // addFont doesn't work with these 2 for some reason
-        CCLabelBMFont::create(" ", "goldFont.fnt");
-        CCLabelBMFont::create(" ", "bigFont.fnt");
+        addFont(textureCache, "goldFont.fnt");
+        addFont(textureCache, "bigFont.fnt");
     }
+
+    maxProgress = ThreadPool::sharedPool()->getJobCount();
+    ThreadPool::sharedPool()->finishQueue();
 
     // 9
     {
