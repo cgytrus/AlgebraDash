@@ -38,61 +38,61 @@ PROFILER_HOOK_AUTO(void, cocos2d::CCDirector, drawScene)
 PROFILER_HOOK_AUTO(void, cocos2d::CCDirector, setNextScene)
 
 // gd init
-MISSING_ON_MAC PROFILER_HOOK_AUTO_ARGS(bool, DrawGridLayer, init, (grid, editor), CCNode* grid, LevelEditorLayer* editor) // win 0x16c4d0 // pred
-MISSING_ON_MAC PROFILER_HOOK_AUTO_ARGS(bool, EditLevelLayer, init, (level), GJGameLevel* level) // win 0x6f5d0 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO_ARGS(bool, EditorUI, init, (level), LevelEditorLayer* level) // win 0x76310 // pred
+MISSING_ON_MAC PROFILER_HOOK_AUTO_ARGS(bool, DrawGridLayer, init, (grid, editor), CCNode* grid, LevelEditorLayer* editor)
+MISSING_ON_MAC PROFILER_HOOK_AUTO_ARGS(bool, EditLevelLayer, init, (level), GJGameLevel* level)
+PROFILER_HOOK_AUTO_ARGS(bool, EditorUI, init, (level), LevelEditorLayer* level)
 PROFILER_HOOK_AUTO_ARGS(bool, LevelEditorLayer, init, (level), GJGameLevel* level)
 PROFILER_HOOK_AUTO_ARGS(bool, LoadingLayer, init, (fromReload), bool fromReload)
 PROFILER_HOOK_AUTO(bool, MenuLayer, init)
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO(bool, ObjectToolbox, init) // win 0x198b20 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO_ARGS(bool, PlayerObject, init, (idk1, idk2, idk3), int idk1, int idk2, CCLayer* idk3) // win 0x1e6da0 // pred
+PROFILER_HOOK_AUTO(bool, ObjectToolbox, init)
+PROFILER_HOOK_AUTO_ARGS(bool, PlayerObject, init, (idk1, idk2, idk3), int idk1, int idk2, CCLayer* idk3)
 PROFILER_HOOK_AUTO_ARGS(bool, PlayLayer, init, (level), GJGameLevel* level)
 
 // gd update
-MISSING_ON_MAC PROFILER_HOOK_AUTO_ARGS(void, DrawGridLayer, update, (dt), float dt) // win 0x16cd80 // pred
-MISSING_ON_MAC PROFILER_HOOK_AUTO_ARGS(void, FMODAudioEngine, update, (dt), float dt) // win 0x23b20 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO_ARGS(void, GameManager, update, (dt), float dt) // win 0xce440 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO_ARGS(void, LevelEditorLayer, update, (dt), float dt) // win 0x26a660 in geode (should be 0x16a660) // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO_ARGS(void, PlayerObject, update, (dt), float dt) // win 0x1e8200 // pred
+MISSING_ON_MAC PROFILER_HOOK_AUTO_ARGS(void, DrawGridLayer, update, (dt), float dt)
+MISSING_ON_MAC PROFILER_HOOK_AUTO_ARGS(void, FMODAudioEngine, update, (dt), float dt)
+PROFILER_HOOK_AUTO_ARGS(void, GameManager, update, (dt), float dt)
+PROFILER_HOOK_AUTO_ARGS(void, LevelEditorLayer, update, (dt), float dt)
+PROFILER_HOOK_AUTO_ARGS(void, PlayerObject, update, (dt), float dt)
 PROFILER_HOOK_AUTO_ARGS(void, PlayLayer, update, (dt), float dt)
 
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO_ARGS(void, GJEffectManager, updateColorEffects, (dt), float dt) // win 0x11e1d0 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO_ARGS(void, GJEffectManager, updatePulseEffects, (dt), float dt) // win 0x11e7f0 // pred
+PROFILER_HOOK_AUTO_ARGS(void, GJEffectManager, updateColorEffects, (dt), float dt)
+PROFILER_HOOK_AUTO_ARGS(void, GJEffectManager, updatePulseEffects, (dt), float dt)
 PROFILER_HOOK_AUTO_ARGS(void, GJEffectManager, updateOpacityEffects, (dt), float dt)
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO_ARGS(void, GJEffectManager, updateSpawnTriggers, (dt), float dt) // win 0x11f000 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO(void, GJEffectManager, preCollisionCheck) // win 0x11d030 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO_ARGS(void, GJEffectManager, prepareMoveActions, (idk1, idk2), float idk1, bool idk2) // win 0x11da30 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO_ARGS(void, GJBaseGameLayer, processMoveActionsStep, (dt), float dt) // win 0x10ffa0 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO(void, GJBaseGameLayer, processRotationActions) // win 0x1101a0 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO(void, GJBaseGameLayer, processMoveActions) // win 0x1107e0 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO_ARGS(void, GJBaseGameLayer, processPlayerFollowActions, (dt), float dt) // win 0x110b10 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO(void, GJBaseGameLayer, processFollowActions) // win 0x110e00 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO(void, GJBaseGameLayer, updateCollisionBlocks) // win 0x10ef70 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO(void, PlayerObject, updateCheckpointTest) // win 0x1e8b50 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO(void, GJEffectManager, postCollisionCheck) // win 0x11d0b0 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO(void, GJBaseGameLayer, updateQueuedLabels) // win 0x111b00 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO_ARGS(void, PlayLayer, updateCamera, (dt), float dt) // win 0x2071d0 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO(void, PlayLayer, loadDefaultColors) // win 0x206e10 // pred
+PROFILER_HOOK_AUTO_ARGS(void, GJEffectManager, updateSpawnTriggers, (dt), float dt)
+PROFILER_HOOK_AUTO(void, GJEffectManager, preCollisionCheck)
+PROFILER_HOOK_AUTO_ARGS(void, GJEffectManager, prepareMoveActions, (idk1, idk2), float idk1, bool idk2)
+PROFILER_HOOK_AUTO_ARGS(void, GJBaseGameLayer, processMoveActionsStep, (dt), float dt)
+PROFILER_HOOK_AUTO(void, GJBaseGameLayer, processRotationActions)
+PROFILER_HOOK_AUTO(void, GJBaseGameLayer, processMoveActions)
+PROFILER_HOOK_AUTO_ARGS(void, GJBaseGameLayer, processPlayerFollowActions, (dt), float dt)
+PROFILER_HOOK_AUTO(void, GJBaseGameLayer, processFollowActions)
+PROFILER_HOOK_AUTO(void, GJBaseGameLayer, updateCollisionBlocks)
+PROFILER_HOOK_AUTO(void, PlayerObject, updateCheckpointTest)
+PROFILER_HOOK_AUTO(void, GJEffectManager, postCollisionCheck)
+PROFILER_HOOK_AUTO(void, GJBaseGameLayer, updateQueuedLabels)
+PROFILER_HOOK_AUTO_ARGS(void, PlayLayer, updateCamera, (dt), float dt)
+PROFILER_HOOK_AUTO(void, PlayLayer, loadDefaultColors)
 PROFILER_HOOK_AUTO(void, PlayLayer, updateVisibility)
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO(void, GJEffectManager, calculateBaseActiveColors) // win 0x11c7c0 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO(void, GJEffectManager, processPulseActions) // win 0x11ea50 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO(void, GJEffectManager, processInheritedColors) // win 0x11c8a0 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO(void, GJEffectManager, processCopyColorPulseActions) // win 0x11ebc0 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO_ARGS(const ccColor3B&, GJEffectManager, getColorSprite, (index), int index) // win 0x11ce20 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO_ARGS(void, GJEffectManager, calculateLightBGColor, (color3), ccColor3B color3) // win 0x11f420 // pred
+PROFILER_HOOK_AUTO(void, GJEffectManager, calculateBaseActiveColors)
+PROFILER_HOOK_AUTO(void, GJEffectManager, processPulseActions)
+PROFILER_HOOK_AUTO(void, GJEffectManager, processInheritedColors)
+PROFILER_HOOK_AUTO(void, GJEffectManager, processCopyColorPulseActions)
+PROFILER_HOOK_AUTO_ARGS(const ccColor3B&, GJEffectManager, getColorSprite, (index), int index)
+PROFILER_HOOK_AUTO_ARGS(void, GJEffectManager, calculateLightBGColor, (color3), ccColor3B color3)
 //PROFILER_HOOK_AUTO_ARGS(static void, GameToolbox, transformColor, (src, dest, hsv), ccColor3B* src, ccColor3B* dest, ccHSVValue hsv) // crashes idk
 TODO_HOOK_ADDRESS PROFILER_HOOK_THIS(GD + 0xebda0, void, GameObject, FUN_004ebda0)
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO_ARGS(void, GameObject, addColorSpriteToParent, (idk), bool idk) // win 0xeb3f0 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO_ARGS(void, AnimatedGameObject, updateChildSpriteColor, (color3), ccColor3B color3) // win 0x2531f0 // pred
+PROFILER_HOOK_AUTO_ARGS(void, GameObject, addColorSpriteToParent, (idk), bool idk)
+PROFILER_HOOK_AUTO_ARGS(void, AnimatedGameObject, updateChildSpriteColor, (color3), ccColor3B color3)
 PROFILER_HOOK_AUTO_ARGS(void, GameObject, setObjectColor, (color), const ccColor3B& color)
 
 PROFILER_HOOK_AUTO(void, GameObject, updateOrientedBox)
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO_ARGS(void, GJBaseGameLayer, reorderObjectSection, (obj), GameObject* obj) // win 0x10fe10 // pred
+PROFILER_HOOK_AUTO_ARGS(void, GJBaseGameLayer, reorderObjectSection, (obj), GameObject* obj)
 MISSING_ON_BOTH PROFILER_HOOK_AUTO_ARGS(void, std::vector<GameObject*>, emplace, (elem), GameObject* elem) // win 0x112470 // not sure if it should be in geode
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO_ARGS(void, GJBaseGameLayer, removeObjectFromSection, (obj), GameObject* obj) // win 0x10ff30 // pred
+PROFILER_HOOK_AUTO_ARGS(void, GJBaseGameLayer, removeObjectFromSection, (obj), GameObject* obj)
 
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO(void, GameObject, activateObject) // wrong overload in geode on win, should be win 0xd1870 instead of 0xef0e0 // pred
-MISSING_ON_MAC PROFILER_HOOK_AUTO_ARGS(void, GameObject, activateObject, (player), PlayerObject* player) // win 0xef0e0 // pred
+PROFILER_HOOK_AUTO(void, GameObject, activateObject)
+MISSING_ON_MAC PROFILER_HOOK_AUTO_ARGS(void, GameObject, activateObject, (player), PlayerObject* player)
 PROFILER_HOOK_AUTO_ARGS(void, GameObject, deactivateObject, (idk), bool idk)
 
 PROFILER_HOOK_AUTO_ARGS(bool, GameManager, getGameVariable, (key), const char* key)
@@ -100,8 +100,8 @@ PROFILER_HOOK_AUTO_ARGS(void, GameManager, setGameVariable, (key, value), const 
 
 // gd draw
 MISSING_ON_MAC PROFILER_HOOK_AUTO(void, DrawGridLayer, draw)
-MISSING_ON_MAC PROFILER_HOOK_AUTO(void, EditorUI, draw) // win 0x18fbe0 // pred
-/* MISSING_ON_WINDOWS */ PROFILER_HOOK_AUTO(void, LevelEditorLayer, draw) // win 0x16b7c0 // pred
+MISSING_ON_MAC PROFILER_HOOK_AUTO(void, EditorUI, draw)
+PROFILER_HOOK_AUTO(void, LevelEditorLayer, draw)
 
 // loading
 PROFILER_HOOK_AUTO(void, LoadingLayer, loadAssets)
@@ -114,7 +114,7 @@ MISSING_ON_MAC_COCOS2D PROFILER_HOOK_AUTO_ARGS(void, cocos2d::CCSpriteFrameCache
 PROFILER_HOOK_AUTO_ARGS(void, cocos2d::CCSpriteFrameCache, addSpriteFramesWithFile, (plistPath), const char* plistPath)
 MISSING_ON_MAC_COCOS2D PROFILER_HOOK_AUTO_ARGS(void, cocos2d::CCSpriteFrameCache, addSpriteFramesWithFile, (plistPath, texture), const char* plistPath, CCTexture2D* texture)
 MISSING_ON_MAC_COCOS2D PROFILER_HOOK_AUTO_ARGS(static CCLabelBMFont*, cocos2d::CCLabelBMFont, create, (idk1, idk2, idk3, idk4, idk5), const char* idk1, const char* idk2, float idk3, CCTextAlignment idk4, CCPoint idk5)
-MISSING_ON_MAC PROFILER_HOOK_AUTO(void, GameSoundManager, asynchronousSetup) // win 0x25520 // pred
+MISSING_ON_MAC PROFILER_HOOK_AUTO(void, GameSoundManager, asynchronousSetup)
 TODO_HOOK_ADDRESS PROFILER_HOOK_AUTO(GD + 0xc9420, void, GameManager, FUN_0049420)
 TODO_HOOK_ADDRESS PROFILER_HOOK_AUTO(GD + 0xa8cb0, void, GameLevelManager, FUN_004a8cb0)
 PROFILER_HOOK_AUTO_ARGS(bool, cocos2d::CCTexture2D, initWithImage, (image), CCImage* image)
