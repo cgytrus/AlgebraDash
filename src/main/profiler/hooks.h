@@ -37,7 +37,7 @@ PROFILER_HOOK_THIS_ARGS(GD + 0x1e8200, void, gd::PlayerObject::update, (self, dt
 PROFILER_HOOK_THIS_ARGS(GD + 0x2029c0, void, gd::PlayLayer::update, (self, dt), float dt)
 
 PROFILER_HOOK_THIS_ARGS(GD + 0x11e1d0, void, gd::GJEffectManager::updateColorEffects, (self, dt), float dt)
-PROFILER_HOOK_THIS_ARGS(GD + 0x11e7f0, void, gd::GJEffectManager::updatePulseEffect, (self, dt), float dts)
+PROFILER_HOOK_THIS_ARGS(GD + 0x11e7f0, void, gd::GJEffectManager::updatePulseEffect, (self, dt), float dt)
 PROFILER_HOOK_THIS_ARGS(GD + 0x11e490, void, gd::GJEffectManager::updateOpacityEffects, (self, dt), float dt)
 PROFILER_HOOK_THIS_ARGS(GD + 0x11f000, void, gd::GJEffectManager::updateSpawnTriggers, (self, dt), float dt)
 PROFILER_HOOK_THIS(GD + 0x11d030, void, gd::GJEffectManager::preCollisionCheck)
@@ -71,7 +71,7 @@ PROFILER_HOOK_THIS_ARGS(GD + 0x112470, void, std::vector<gd::GameObject*>::empla
 PROFILER_HOOK_THIS_ARGS(GD + 0x10ff30, void, gd::GJBaseGameLayer::removeObjectFromSection, (self, obj), gd::GameObject* obj)
 
 PROFILER_HOOK_THIS(GD + 0xd1870, void, gd::GameObject::activateObject)
-PROFILER_HOOK_THIS_ARGS(GD + 0xef0e0, void, gd::GameObject::activateObject, (self, player), PlayerObject* player)
+PROFILER_HOOK_THIS_ARGS(GD + 0xef0e0, void, gd::GameObject::activateObject, (self, player), gd::PlayerObject* player)
 PROFILER_HOOK_THIS_ARGS(GD + 0xd19b0, void, gd::GameObject::deactivateObject, (self, idk), bool idk)
 
 PROFILER_HOOK_THIS_ARGS(GD + 0xc9d30, bool, gd::GameManager::getGameVariable, (self, key), const char* key)

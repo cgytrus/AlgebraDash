@@ -5,7 +5,7 @@ static ThreadPool* _sharedPool;
 ThreadPool* ThreadPool::sharedPool() { return _sharedPool; }
 
 void ThreadPool::start() {
-    ZoneScoped
+    ZoneScoped;
     const uint32_t threadCount = std::thread::hardware_concurrency();
     threads.resize(threadCount);
     for(uint32_t i = 0; i < threadCount; i++)
@@ -13,7 +13,7 @@ void ThreadPool::start() {
 }
 
 void ThreadPool::queueJob(const std::function<void()>& job) {
-    ZoneScoped
+    ZoneScoped;
     {
         std::unique_lock<std::mutex> lock(queueMutex);
         jobs.push(job);
@@ -26,18 +26,18 @@ void ThreadPool::queueJob(const std::function<void()>& job) {
 }
 
 void ThreadPool::queueOneJob(const std::function<void()>& job) {
-    ZoneScoped
+    ZoneScoped;
     ThreadPool::queueJob(job);
     mutexCondition.notify_one();
 }
 
 void ThreadPool::finishQueue() {
-    ZoneScoped
+    ZoneScoped;
     mutexCondition.notify_all();
 }
 
 void ThreadPool::stop() {
-    ZoneScoped
+    ZoneScoped;
     {
         std::unique_lock<std::mutex> lock(queueMutex);
         shouldTerminate = true;
@@ -54,7 +54,7 @@ void ThreadPool::stop() {
 }
 
 void ThreadPool::threadLoop() {
-    ZoneScoped
+    ZoneScoped;
     while(true) {
         std::function<void()> job;
         {
@@ -77,7 +77,7 @@ void ThreadPool::threadLoop() {
 }
 
 void ThreadPool::waitForAllJobs() {
-    ZoneScoped
+    ZoneScoped;
     std::unique_lock<std::mutex> lock(jobCountMutex);
     jobCountCondition.wait(lock, [this] {
         return jobCount <= 0;
@@ -85,7 +85,7 @@ void ThreadPool::waitForAllJobs() {
 }
 
 size_t ThreadPool::getJobCount() {
-    ZoneScoped
+    ZoneScoped;
     std::unique_lock<std::mutex> lock(jobCountMutex);
     return jobCount;
 }

@@ -13,7 +13,7 @@ struct LoadedImage {
 std::mutex loadedImagesMutex;
 std::vector<LoadedImage> loadedImages;
 void addImage(CCTextureCache* self, const char* path, const char* plistPath, CCTexture2DPixelFormat pixelFormat = kCCTexture2DPixelFormat_DontChange) {
-    ZoneScoped
+    ZoneScoped;
 
     CCImage* pImage = nullptr;
 
@@ -58,7 +58,7 @@ void addImage(CCTextureCache* self, const char* path, const char* plistPath, CCT
         eImageFormat = CCImage::kFmtWebp;
 
     ThreadPool::sharedPool()->queueJob([self, fullpath, eImageFormat, pathKey, plistPath, pixelFormat] {
-        ZoneScopedN("init image job")
+        ZoneScopedN("init image job");
 
         auto pImage = new CCImage();
         if(!pImage)
@@ -78,7 +78,7 @@ void addImage(CCTextureCache* self, const char* path, const char* plistPath, CCT
 }
 
 void addFont(CCTextureCache* textureCache, const char* fontFile) {
-    ZoneScoped
+    ZoneScoped;
     auto fontConf = FNTConfigLoadFile(fontFile);
     if(!fontConf)
         return;
@@ -94,36 +94,36 @@ public:
 
 int maxProgress = 0;
 void load(gd::LoadingLayer* self) {
-    ZoneScoped
+    ZoneScoped;
     auto textureCache = CCTextureCache::sharedTextureCache();
 
     // 1
     {
-        ZoneScopedN("load assets 1")
+        ZoneScopedN("load assets 1");
         addImage(textureCache, "GJ_GameSheet.png", "GJ_GameSheet.plist");
     }
 
     // 2
     {
-        ZoneScopedN("load assets 2")
+        ZoneScopedN("load assets 2");
         addImage(textureCache, "GJ_GameSheet02.png", "GJ_GameSheet02.plist");
     }
 
     // 3
     {
-        ZoneScopedN("load assets 3")
+        ZoneScopedN("load assets 3");
         addImage(textureCache, "GJ_GameSheet03.png", "GJ_GameSheet03.plist");
     }
 
     // 4
     {
-        ZoneScopedN("load assets 4")
+        ZoneScopedN("load assets 4");
         addImage(textureCache, "GJ_GameSheet04.png", "GJ_GameSheet04.plist");
     }
 
     // 5
     {
-        ZoneScopedN("load assets 5")
+        ZoneScopedN("load assets 5");
         addImage(textureCache, "GJ_GameSheetGlow.png", "GJ_GameSheetGlow.plist");
         addImage(textureCache, "FireSheet_01.png", "FireSheet_01.plist");
         addImage(textureCache, "GJ_ShopSheet.png", "GJ_ShopSheet.plist");
@@ -133,7 +133,7 @@ void load(gd::LoadingLayer* self) {
 
     // 6
     {
-        ZoneScopedN("load assets 6")
+        ZoneScopedN("load assets 6");
         auto useRobtopDumbFormatForColorPicker = *(bool*)((uintptr_t)CCApplication::sharedApplication() + 0xa7);
         addImage(textureCache, "CCControlColourPickerSpriteSheet.png", "CCControlColourPickerSpriteSheet.plist",
             useRobtopDumbFormatForColorPicker ? kCCTexture2DPixelFormat_DontChange : CCTexture2DPixelFormat::kCCTexture2DPixelFormat_Default);
@@ -146,7 +146,7 @@ void load(gd::LoadingLayer* self) {
 
     // 7
     {
-        ZoneScopedN("load assets 7")
+        ZoneScopedN("load assets 7");
         addImage(textureCache, "GJ_square01.png", nullptr);
         addImage(textureCache, "GJ_square02.png", nullptr);
         addImage(textureCache, "GJ_square03.png", nullptr);
@@ -157,7 +157,7 @@ void load(gd::LoadingLayer* self) {
 
     // 8
     {
-        ZoneScopedN("load assets 8")
+        ZoneScopedN("load assets 8");
         addFont(textureCache, "chatFont.fnt");
         addFont(textureCache, "goldFont.fnt");
         addFont(textureCache, "bigFont.fnt");
@@ -168,7 +168,7 @@ void load(gd::LoadingLayer* self) {
 
     // 9
     {
-        ZoneScopedN("load assets 9")
+        ZoneScopedN("load assets 9");
         class ObjectManager;
         class CCAnimateFrameCache;
 
@@ -197,7 +197,7 @@ void load(gd::LoadingLayer* self) {
     // 11
     // what.
     {
-        ZoneScopedN("load assets 11")
+        ZoneScopedN("load assets 11");
         auto gameManager = gd::GameManager::sharedState();
         if(gameManager->m_bClickedEditor && !self->m_bFromRefresh)
             gameManager->m_bShowProgressBar = true;
@@ -205,13 +205,13 @@ void load(gd::LoadingLayer* self) {
 
     // 12
     {
-        ZoneScopedN("load assets 12")
+        ZoneScopedN("load assets 12");
         gd::CCTextInputNode::create("Temp", self, "bigFont.fnt", 200.f, 50.f);
     }
 
     // 13
     {
-        ZoneScopedN("load assets 13")
+        ZoneScopedN("load assets 13");
         if(!self->m_bFromRefresh) {
             auto circleWave = gd::CCCircleWave::create(true, true, 10.f, 5.f, 0.3f);
             self->addChild(circleWave);
@@ -222,7 +222,7 @@ void load(gd::LoadingLayer* self) {
 }
 
 void finishLoading(gd::LoadingLayer* self) {
-    ZoneScopedN("load assets 14")
+    ZoneScopedN("load assets 14");
 
     auto application = CCApplication::sharedApplication();
     CCDirector::sharedDirector()->setDelegate((CCDirectorDelegate*)((uintptr_t)application + 0x98)); // idk what 98 is
@@ -235,7 +235,7 @@ void finishLoading(gd::LoadingLayer* self) {
 }
 
 void finishAddImage() {
-    ZoneScoped
+    ZoneScoped;
     std::unique_lock<std::mutex> lock(loadedImagesMutex);
 
     auto textureCache = CCTextureCache::sharedTextureCache();
@@ -266,7 +266,7 @@ void finishAddImage() {
 }
 
 void updateProgressBar(gd::LoadingLayer* self) {
-    ZoneScoped
+    ZoneScoped;
     auto sliderX = self->m_fSliderGrooveXPos;
 
     self->unk11D = true;
@@ -279,7 +279,7 @@ void updateProgressBar(gd::LoadingLayer* self) {
 }
 
 void runLoadAssets(gd::LoadingLayer* self) {
-    ZoneScoped
+    ZoneScoped;
     union {
         uintptr_t ptr;
         SEL_CallFunc selector;
@@ -293,7 +293,7 @@ void runLoadAssets(gd::LoadingLayer* self) {
 
 void (__thiscall* LoadingLayer_loadAssets)(gd::LoadingLayer*);
 void __fastcall LoadingLayer_loadAssets_H(gd::LoadingLayer* self) {
-    ZoneScoped
+    ZoneScoped;
     if(self->m_nLoadStep <= 0) {
         load(self);
         self->m_nLoadStep = 14;
@@ -302,7 +302,7 @@ void __fastcall LoadingLayer_loadAssets_H(gd::LoadingLayer* self) {
     finishAddImage();
 
     if(ThreadPool::sharedPool()->getJobCount() > 0) {
-        ZoneScopedN("wait")
+        ZoneScopedN("wait");
         updateProgressBar(self);
         runLoadAssets(self);
     }

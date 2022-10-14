@@ -14,9 +14,9 @@ int __fastcall CCApplication_setupVerticalSync_H(CCApplication* self) {
 
 bool (__thiscall* CCEGLView_swapBuffers)(CCEGLView*);
 bool __fastcall CCEGLView_swapBuffers_H(CCEGLView* self) {
-    ZoneScopedN("CCEGLView::swapBuffers")
+    ZoneScopedN("CCEGLView::swapBuffers");
     auto ret = CCEGLView_swapBuffers(self);
-    FrameMark
+    FrameMark;
     return ret;
 }
 
@@ -27,7 +27,7 @@ bool __fastcall CCEGLView_swapBuffers_H(CCEGLView* self) {
 #define PROFILER_HOOK(address, name, ret, callConvO, callConvH, argsO, argsH, argsC) \
 ret (callConvO* TracyConcat(profilerHook_, __LINE__)##_O)argsO; \
 ret callConvH TracyConcat(profilerHook_, __LINE__)##_H##argsH { \
-    ZoneScopedN(#name) \
+    ZoneScopedN(#name); \
     return TracyConcat(profilerHook_, __LINE__)##_O##argsC; \
 } \
 inline void TracyConcat(initProfilerHook_, __LINE__)(uintptr_t GD, HMODULE cocos2dModule, uintptr_t COCOS2D) { \
@@ -58,12 +58,12 @@ void memoryAllocated(void* memory, size_t size, const char* messageText) {
         memoryTracker.insert(std::pair<uintptr_t, bool>(memoryBoundRight, false));
 #endif
 
-        TracyAlloc(memory, size)
+        TracyAlloc(memory, size);
 #ifdef PROFILER_MEMORY_TRACKER
     }
 #ifdef MEMORY_TRACKER_MESSAGES
     else {
-        TracyMessage(messageText, strlen(messageText))
+        TracyMessage(messageText, strlen(messageText));
     }
 #endif
 #endif
@@ -77,12 +77,12 @@ void memoryFreed(void* memory, const char* messageText) {
         memoryTracker.erase(memoryTracker.upper_bound(memoryCast));
 #endif
 
-        TracyFree(memory)
+        TracyFree(memory);
 #ifdef PROFILER_MEMORY_TRACKER
     }
 #ifdef MEMORY_TRACKER_MESSAGES
     else {
-        TracyMessage(messageText, strlen(messageText))
+        TracyMessage(messageText, strlen(messageText));
     }
 #endif
 #endif

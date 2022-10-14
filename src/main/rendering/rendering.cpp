@@ -3,7 +3,7 @@
 
 void (__thiscall* CCSpriteBatchNode_draw)(CCSpriteBatchNode*);
 void __fastcall CCSpriteBatchNode_draw_H(CCSpriteBatchNode* self) {
-    ZoneScoped
+    ZoneScoped;
 
     if(self->getTextureAtlas()->getTotalQuads() == 0)
         return;
@@ -20,7 +20,7 @@ void __fastcall CCSpriteBatchNode_draw_H(CCSpriteBatchNode* self) {
         CCObject** globalEnd = globalStart + children->data->num;
         for(; globalStart < globalEnd; globalStart += RENDER_THREAD_BATCH_COUNT) {
             threadPool->queueJob([globalStart, globalEnd] {
-                ZoneScopedN("update transforms job")
+                ZoneScopedN("update transforms job");
                 CCObject** currentStart = globalStart;
                 CCObject** currentEnd = globalStart + RENDER_THREAD_BATCH_COUNT;
                 for(; currentStart < currentEnd && currentStart < globalEnd; ++currentStart) {

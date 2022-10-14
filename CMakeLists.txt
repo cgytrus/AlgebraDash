@@ -29,10 +29,9 @@ set(TRACY_ON_DEMAND ON)
 
 set(TRACY_ONLY_LOCALHOST OFF)
 
-# for some reason call stack info collection makes GD not startup
-# so it has to be turned off
-set(TRACY_NO_CALLSTACK ON)
+set(TRACY_NO_CALLSTACK OFF)
 set(TRACY_CALLSTACK OFF)
 
 add_subdirectory(libraries/tracy)
+target_include_directories(${PROJECT_NAME} PRIVATE libraries/tracy/public/tracy)
 target_link_libraries(${PROJECT_NAME} Tracy::TracyClient)
