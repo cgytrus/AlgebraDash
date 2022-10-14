@@ -192,6 +192,7 @@ PROFILER_HOOK_THIS(COCOS2DSYM("?updateColor@CCSprite@cocos2d@@IAEXXZ"), void, co
 PROFILER_HOOK_THIS(COCOS2DSYM("?updateTransform@CCSprite@cocos2d@@UAEXXZ"), void, cocos2d::CCSprite::updateTransform)
 PROFILER_HOOK_THIS(COCOS2DSYM("?draw@CCSprite@cocos2d@@UAEXXZ"), void, cocos2d::CCSprite::draw)
 PROFILER_HOOK_THIS(COCOS2DSYM("?displayFrame@CCSprite@cocos2d@@UAEPAVCCSpriteFrame@2@XZ"), CCSpriteFrame*, cocos2d::CCSprite::displayFrame)
+PROFILER_HOOK_THIS(COCOS2DSYM("?sortAllChildren@CCSprite@cocos2d@@UAEXXZ"), void, cocos2d::CCSprite::sortAllChildren)
 PROFILER_HOOK_THIS(COCOS2DSYM("?draw@CCSpriteBatchNode@cocos2d@@UAEXXZ"), void, cocos2d::CCSpriteBatchNode::draw)
 PROFILER_HOOK_THIS(COCOS2DSYM("?sortAllChildren@CCSpriteBatchNode@cocos2d@@UAEXXZ"), void, cocos2d::CCSpriteBatchNode::sortAllChildren)
 PROFILER_HOOK_THIS_ARGS(COCOS2DSYM("?updateAtlasIndex@CCSpriteBatchNode@cocos2d@@AAEXPAVCCSprite@2@PAH@Z"), void, cocos2d::CCSpriteBatchNode::updateAtlastIndex, (self, sprite, curIndex), CCSprite* sprite, int* curIndex)
