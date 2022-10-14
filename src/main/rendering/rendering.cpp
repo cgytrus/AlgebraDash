@@ -1,5 +1,4 @@
 #include "../../includes.h"
-#include "../../ThreadPool.hpp"
 
 void (__thiscall* CCSpriteBatchNode_draw)(CCSpriteBatchNode*);
 void __fastcall CCSpriteBatchNode_draw_H(CCSpriteBatchNode* self) {
@@ -14,25 +13,23 @@ void __fastcall CCSpriteBatchNode_draw_H(CCSpriteBatchNode* self) {
     shader->setUniformsForBuiltins();
 
     if(self->getChildrenCount() > 0) {
-        auto threadPool = ThreadPool::sharedPool();
+        auto threadPool = sharedPool();
         CCArray* children = self->getChildren();
-        CCObject** globalStart = children->data->arr;
-        CCObject** globalEnd = globalStart + children->data->num;
-        for(; globalStart < globalEnd; globalStart += RENDER_THREAD_BATCH_COUNT) {
-            threadPool->queueJob([globalStart, globalEnd] {
+        CCObject** objects = children->data->arr;
+        BS::multi_future<void> updateTransformsJob =
+            threadPool->parallelize_loop(0, children->data->num, [objects](unsigned int a, unsigned int b) {
                 ZoneScopedN("update transforms job");
-                CCObject** currentStart = globalStart;
-                CCObject** currentEnd = globalStart + RENDER_THREAD_BATCH_COUNT;
-                for(; currentStart < currentEnd && currentStart < globalEnd; ++currentStart) {
-                    CCSprite* sprite = (CCSprite*)*currentStart;
+                for(unsigned int i = a; i < b; ++i) {
+                    CCSprite* sprite = (CCSprite*)objects[i];
                     if(!sprite)
                         continue;
                     sprite->updateTransform();
                 }
             });
+        {
+            ZoneScopedN("wait");
+            updateTransformsJob.wait();
         }
-        threadPool->finishQueue();
-        threadPool->waitForAllJobs();
     }
 
     auto blendFunc = self->getBlendFunc();

@@ -1,5 +1,4 @@
 #include "../includes.h"
-#include "../ThreadPool.hpp"
 
 #include "profiler/profiler.h"
 
@@ -12,6 +11,34 @@
 #include <iostream>
 #include <fstream>
 #endif
+
+static BS::thread_pool* _sharedPool;
+BS::thread_pool* sharedPool() { return _sharedPool; }
+
+bool _created = false;
+bool (__thiscall* CCEGLView_windowShouldClose)(CCEGLView*);
+bool __fastcall CCEGLView_windowShouldClose_H(CCEGLView* self) {
+    auto shouldClose = CCEGLView_windowShouldClose(self);
+    if(_created) {
+        if(shouldClose && _sharedPool)
+            delete _sharedPool;
+        return shouldClose;
+    }
+
+    if(shouldClose)
+        return shouldClose;
+
+    _sharedPool = new BS::thread_pool(std::thread::hardware_concurrency() - 1);
+    _created = true;
+
+    return shouldClose;
+}
+
+void initThreadPool(HMODULE cocos2dModule) {
+    MH_CreateHook(reinterpret_cast<void*>(GetProcAddress(cocos2dModule, "?windowShouldClose@CCEGLView@cocos2d@@QAE_NXZ")),
+        reinterpret_cast<void*>(&CCEGLView_windowShouldClose_H),
+        reinterpret_cast<void**>(&CCEGLView_windowShouldClose));
+}
 
 DWORD WINAPI mainThread(void* hModule) {
 #ifdef DEBUG

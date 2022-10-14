@@ -10,3 +10,6 @@
 [submodule "libraries/tracy"]
 	path = libraries/tracy
 	url = https://github.com/wolfpld/tracy
+[submodule "libraries/thread-pool"]
+	path = libraries/thread-pool
+	url = https://github.com/bshoshany/thread-pool

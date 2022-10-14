@@ -11,6 +11,9 @@
 #include <MinHook.h>
 #include <gd.h>
 
+#include <BS_thread_pool.hpp>
+BS::thread_pool* sharedPool();
+
 using std::uintptr_t;
 
 // since everything in cocos2d starts with CC, there is no chance

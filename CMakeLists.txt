@@ -14,6 +14,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
   libraries/minhook/include
   libraries/gd.h/include
   libraries/gd.h
+  libraries/thread-pool
 )
 
 add_subdirectory(libraries/minhook)

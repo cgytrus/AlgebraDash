@@ -1,5 +1,4 @@
 #include "../../includes.h"
-#include "../../ThreadPool.hpp"
 #include <mutex>
 
 const CCTexture2DPixelFormat kCCTexture2DPixelFormat_DontChange = (CCTexture2DPixelFormat)-1;
@@ -57,7 +56,7 @@ void addImage(CCTextureCache* self, const char* path, const char* plistPath, CCT
     else if(std::string::npos != lowerCase.find(".webp"))
         eImageFormat = CCImage::kFmtWebp;
 
-    ThreadPool::sharedPool()->queueJob([self, fullpath, eImageFormat, pathKey, plistPath, pixelFormat] {
+    sharedPool()->push_task([self, fullpath, eImageFormat, pathKey, plistPath, pixelFormat] {
         ZoneScopedN("init image job");
 
         auto pImage = new CCImage();
@@ -163,8 +162,7 @@ void load(gd::LoadingLayer* self) {
         addFont(textureCache, "bigFont.fnt");
     }
 
-    maxProgress = ThreadPool::sharedPool()->getJobCount();
-    ThreadPool::sharedPool()->finishQueue();
+    maxProgress = sharedPool()->get_tasks_total();
 
     // 9
     {
@@ -271,7 +269,7 @@ void updateProgressBar(gd::LoadingLayer* self) {
 
     self->unk11D = true;
 
-    float progress = (1.f - (float)ThreadPool::sharedPool()->getJobCount() / maxProgress) * sliderX;
+    float progress = (1.f - (float)sharedPool()->get_tasks_total() / maxProgress) * sliderX;
     if(progress <= sliderX)
         sliderX = progress;
 
@@ -301,7 +299,7 @@ void __fastcall LoadingLayer_loadAssets_H(gd::LoadingLayer* self) {
 
     finishAddImage();
 
-    if(ThreadPool::sharedPool()->getJobCount() > 0) {
+    if(sharedPool()->get_tasks_total() > 0) {
         ZoneScopedN("wait");
         updateProgressBar(self);
         runLoadAssets(self);

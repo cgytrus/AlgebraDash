@@ -36,22 +36,22 @@ PROFILER_HOOK_THIS_ARGS(GD + 0x16a660, void, gd::LevelEditorLayer::update, (self
 PROFILER_HOOK_THIS_ARGS(GD + 0x1e8200, void, gd::PlayerObject::update, (self, dt), float dt)
 PROFILER_HOOK_THIS_ARGS(GD + 0x2029c0, void, gd::PlayLayer::update, (self, dt), float dt)
 
-PROFILER_HOOK_THIS_ARGS(GD + 0x11e1d0, void, gd::GJEffectManager::updateColorEffects, (self, dt), float dt)
-PROFILER_HOOK_THIS_ARGS(GD + 0x11e7f0, void, gd::GJEffectManager::updatePulseEffect, (self, dt), float dt)
-PROFILER_HOOK_THIS_ARGS(GD + 0x11e490, void, gd::GJEffectManager::updateOpacityEffects, (self, dt), float dt)
-PROFILER_HOOK_THIS_ARGS(GD + 0x11f000, void, gd::GJEffectManager::updateSpawnTriggers, (self, dt), float dt)
+//PROFILER_HOOK_THIS_ARGS(GD + 0x11e1d0, void, gd::GJEffectManager::updateColorEffects, (self, dt), float dt) // TODO: fix
+//PROFILER_HOOK_THIS_ARGS(GD + 0x11e7f0, void, gd::GJEffectManager::updatePulseEffect, (self, dt), float dt) // TODO: fix
+//PROFILER_HOOK_THIS_ARGS(GD + 0x11e490, void, gd::GJEffectManager::updateOpacityEffects, (self, dt), float dt) // TODO: fix
+//PROFILER_HOOK_THIS_ARGS(GD + 0x11f000, void, gd::GJEffectManager::updateSpawnTriggers, (self, dt), float dt) // TODO: fix
 PROFILER_HOOK_THIS(GD + 0x11d030, void, gd::GJEffectManager::preCollisionCheck)
-PROFILER_HOOK_THIS_ARGS(GD + 0x11da30, void, gd::GJEffectManager::prepareMoveActions, (self, idk1, idk2), float idk1, bool idk2)
-PROFILER_HOOK_THIS_ARGS(GD + 0x10ffa0, void, gd::PlayLayer::processMoveActionsStep, (self, dt), float dt)
+//PROFILER_HOOK_THIS_ARGS(GD + 0x11da30, void, gd::GJEffectManager::prepareMoveActions, (self, idk1, idk2), float idk1, bool idk2) // TODO: fix
+//PROFILER_HOOK_THIS_ARGS(GD + 0x10ffa0, void, gd::PlayLayer::processMoveActionsStep, (self, dt), float dt) // TODO: fix
 PROFILER_HOOK_THIS(GD + 0x1101a0, void, gd::PlayLayer::processRotationActions)
 PROFILER_HOOK_THIS(GD + 0x1107e0, void, gd::PlayLayer::processMoveActions)
-PROFILER_HOOK_THIS_ARGS(GD + 0x110b10, void, gd::PlayLayer::processPlayerFollowActions, (self, dt), float dt)
-PROFILER_HOOK_THIS(GD + 0x110e00, void, gd::PlayLayer::processFollowActions)
+//PROFILER_HOOK_THIS_ARGS(GD + 0x110b10, void, gd::PlayLayer::processPlayerFollowActions, (self, dt), float dt) // TODO: fix
+//PROFILER_HOOK_THIS(GD + 0x110e00, void, gd::PlayLayer::processFollowActions) // TODO: fix
 PROFILER_HOOK_THIS(GD + 0x10ef70, void, gd::PlayLayer::updateCollisionBlocks)
 PROFILER_HOOK_THIS(GD + 0x1e8b50, void, gd::PlayerObject::updateCheckpointTest)
 PROFILER_HOOK_THIS(GD + 0x11d0b0, void, gd::PlayLayer::postCollisionCheck)
 PROFILER_HOOK_THIS(GD + 0x111b00, void, gd::PlayLayer::updateQueuedLabels)
-PROFILER_HOOK_THIS_ARGS(GD + 0x2071d0, void, gd::PlayLayer::updateCamera, (self, dt), float dt)
+//PROFILER_HOOK_THIS_ARGS(GD + 0x2071d0, void, gd::PlayLayer::updateCamera, (self, dt), float dt) // TODO: fix
 PROFILER_HOOK_THIS(GD + 0x205460, void, gd::PlayLayer::updateVisibility)
 PROFILER_HOOK_THIS(GD + 0x11c7c0, void, gd::GJEffectManager::calculateBaseActiveColors)
 PROFILER_HOOK_THIS(GD + 0x11ea50, void, gd::GJEffectManager::processPulseActions)
