@@ -174,6 +174,131 @@ float getRelativeMod(gd::PlayLayer* self, float objX, float outSpeed, float inSp
         (cameraCenterX + *g_halfScreenWidth - objX) * outSpeed, 0.f, 1.f);
 }
 
+void updateGameObject(gd::PlayLayer* self, gd::GameObject* gameObject, float meteringValue,
+    ccColor3B transCol0, ccColor3B bgColor, ccColor3B transformedBgColor, ccColor3B lightBgColor,
+    float screenLeft, float screenRight, float playerPos, float boundLeft, float boundRight, float offsetBoundRight) {
+    updateMainColor(gameObject);
+    updateSecondaryColor(gameObject);
+
+    if(gameObject->m_bActive && self->m_hasColors.size() > 0) {
+        bool hasBaseColor = self->m_hasColors[gameObject->m_baseColorID];
+        bool hasDetailColor = gameObject->m_pDetailSprite != nullptr &&
+            self->m_hasColors[gameObject->m_detailColorID];
+        if(hasBaseColor || hasDetailColor) {
+            gameObject->addMainSpriteToParent(false);
+            gameObject->addColorSpriteToParent(false);
+        }
+    }
+
+    gameObject->activateObject();
+
+    if(gameObject->m_isAnimated)
+        gameObject->updateSyncedAnimation(self->m_totalTime);
+
+    CCPoint objPos;
+    gameObject->getRealPosition(objPos);
+    if(objPos.x <= (self->m_cameraX + *g_halfScreenWidth))
+        objPos.x += gameObject->m_fRectXCenterMaybe;
+    else
+        objPos.x -= gameObject->m_fRectXCenterMaybe;
+    float relativeMod = getRelativeMod(self, objPos.x, 0.014285714f, 0.014285714f);
+
+    // idk
+    if(gameObject->m_unk2e2)
+        gameObject->updateChildSpriteColor(transCol0);
+
+    // breakable block
+    if(gameObject->m_nObjectID == 143)
+        gameObject->setGlowColor(transformedBgColor);
+
+    // idk
+    if(gameObject->m_unk364)
+        return;
+
+    // pulse
+    if(gameObject->m_useAudioScale)
+        gameObject->setRScale(gameObject->m_customAudioScale ?
+            std::lerp(gameObject->m_minAudioScale, gameObject->m_maxAudioScale, meteringValue - 0.1f) :
+            meteringValue);
+
+    // fade/enter
+    bool ignoreFade = gameObject->m_ignoreFade;
+    bool unk365 = gameObject->m_unk365;
+    bool unk368 = gameObject->m_unk368;
+    bool unk3b0 = gameObject->m_unk3b0;
+    int activeEnterEffect = gameObject->m_activeEnterEffect;
+    int unk2ac = self->unk2AC;
+    gameObject->setOpacity(!ignoreFade && (((!unk365 || unk368 && unk3b0) || activeEnterEffect != 0 && activeEnterEffect != 1) || unk2ac != 1) ?
+        (GLubyte)std::round(relativeMod * 255.f) : 255u);
+
+    // idk
+    if(gameObject->m_glowUserBackgroundColour)
+        gameObject->setGlowColor(gameObject->m_useSpecialLight ? bgColor : transformedBgColor);
+
+    // invisible objects
+    if(gameObject->m_invisibleMode) {
+        float invisibleRelativeMod = getRelativeMod(self, objPos.x, 0.02f, 0.014285714f);
+        if(self->m_pPlayer1->m_isDead)
+            gameObject->setGlowColor(transformedBgColor);
+        else {
+            float valIdk = std::clamp(self->m_cameraX + boundRight - objPos.x > 0.f ?
+                (self->m_cameraX + playerPos - objPos.x) / std::max(boundLeft, 1.f) :
+                (objPos.x - self->m_cameraX - boundRight) / std::max(offsetBoundRight, 1.f), 0.f, 1.f);
+            auto mainOpacity = std::min((0.05f + valIdk * 0.95f), invisibleRelativeMod);
+            auto glowOpacity = std::min((0.15f + valIdk * 0.85f), invisibleRelativeMod);
+            gameObject->setOpacity((GLubyte)(mainOpacity * 255.f));
+            gameObject->setGlowOpacity((GLubyte)(glowOpacity * 255.f));
+
+            if(mainOpacity <= 0.8f)
+                gameObject->setGlowColor(transformedBgColor);
+            else {
+                bool transBgColorIsDark = transformedBgColor.r + transformedBgColor.g + transformedBgColor.b < 150u;
+                auto useCol = transBgColorIsDark ? ccColor3B{255u, 255u, 255u} : lightBgColor;
+                float t = 0.7f + (1.f - (mainOpacity - 0.8f) / 0.2f) * 0.3f;
+                gd::GJEffectManager::getMixedColor(useCol, transformedBgColor, useCol, t);
+                gameObject->setGlowColor(useCol);
+            }
+        }
+    }
+
+    self->applyEnterEffect(gameObject);
+
+    bool isFlipping = self->m_mirrorTransition != 0.f && self->m_mirrorTransition != 1.f;
+    if(!isFlipping) {
+        if(!self->unk460)
+            return;
+        gameObject->setFlipX(gameObject->m_startFlipX);
+        gameObject->setFlipY(gameObject->m_startFlipY);
+        gameObject->setRotation(gameObject->m_rotation);
+        gameObject->setPosition(gameObject->getPosition());
+        return;
+    }
+
+    // mirror animation
+    float t = self->m_cameraFlip == -1.f ? 1.f - self->m_mirrorTransition : self->m_mirrorTransition;
+    auto pos = gameObject->getPosition();
+    pos.x += ((screenLeft + screenRight) - (pos.x - self->m_cameraX) * 2.f) * t;
+    gameObject->setPosition(pos);
+    float rot = std::abs(self->getRotation());
+    bool isOnSide = rot == 90.f || rot == 270.f;
+    if(self->m_cameraFlip == 1.f && self->m_mirrorTransition >= 0.5f ||
+       self->m_cameraFlip != 1.f && self->m_mirrorTransition <= 0.5f) {
+        if(isOnSide)
+            gameObject->setFlipY(!gameObject->m_startFlipY);
+        else
+            gameObject->setFlipX(!gameObject->m_startFlipX);
+        gameObject->setRotation(-gameObject->m_rotation);
+    }
+    else if(self->unk3EC && (self->m_cameraFlip != 1.f && self->m_mirrorTransition >= 0.5f ||
+        self->m_cameraFlip == 1.f && self->m_mirrorTransition <= 0.5f)) {
+        if(isOnSide)
+            gameObject->setFlipY(gameObject->m_startFlipY);
+        else
+            gameObject->setFlipX(gameObject->m_startFlipX);
+        gameObject->setRotation(gameObject->m_rotation * self->m_cameraFlip);
+    }
+}
+
 void (__thiscall* PlayLayer_updateVisibility)(gd::PlayLayer*);
 void __fastcall PlayLayer_updateVisibility_H(gd::PlayLayer* self) {
     ZoneScoped;
@@ -211,7 +336,6 @@ void __fastcall PlayLayer_updateVisibility_H(gd::PlayLayer* self) {
     auto bgColor = self->m_pEffectManager->activeColorForIndex(1000);
     auto transformedBgColor = bgColor;
     transformColor(transformedBgColor, 0.f, -0.2f, 0.2f);
-    bool transBgColorIsDark = transformedBgColor.r + transformedBgColor.g + transformedBgColor.b < 150u;
 
     float screenLeft = director->getScreenLeft();
     float screenRight = director->getScreenRight();
@@ -220,8 +344,6 @@ void __fastcall PlayLayer_updateVisibility_H(gd::PlayLayer* self) {
     float boundLeft = playerPos - 30.f;
     float boundRight = playerPos + 110.f;
     float offsetBoundRight = screenRight - boundRight - 90.f;
-
-    bool playerIsDead = self->m_pPlayer1->m_isDead;
 
     CCObject* obj;
     int sectionCount = self->m_pObjectContainerArrays->count();
@@ -297,129 +419,11 @@ void __fastcall PlayLayer_updateVisibility_H(gd::PlayLayer* self) {
 
     {
         ZoneScopedN("loop 4: update objects");
-        float cameraCenterX = self->m_cameraX + *g_halfScreenWidth;
         CCARRAY_FOREACH(self->m_objectsToUpdate, obj) {
             auto gameObject = reinterpret_cast<gd::GameObject*>(obj);
-
-            updateMainColor(gameObject);
-            updateSecondaryColor(gameObject);
-
-            if(gameObject->m_bActive && self->m_hasColors.size() > 0) {
-                bool hasBaseColor = self->m_hasColors[gameObject->m_baseColorID];
-                bool hasDetailColor = gameObject->m_pDetailSprite != nullptr &&
-                    self->m_hasColors[gameObject->m_detailColorID];
-                if(hasBaseColor || hasDetailColor) {
-                    gameObject->addMainSpriteToParent(false);
-                    gameObject->addColorSpriteToParent(false);
-                }
-            }
-
-            gameObject->activateObject();
-
-            if(gameObject->m_isAnimated)
-                gameObject->updateSyncedAnimation(self->m_totalTime);
-
-            CCPoint objPos;
-            gameObject->getRealPosition(objPos);
-            if(objPos.x <= cameraCenterX)
-                objPos.x += gameObject->m_fRectXCenterMaybe;
-            else
-                objPos.x -= gameObject->m_fRectXCenterMaybe;
-            float relativeMod = getRelativeMod(self, objPos.x, 0.014285714f, 0.014285714f);
-
-            // idk
-            if(gameObject->m_unk2e2)
-                gameObject->updateChildSpriteColor(transCol0);
-
-            // breakable block
-            if(gameObject->m_nObjectID == 143)
-                gameObject->setGlowColor(transformedBgColor);
-
-            // idk
-            if(gameObject->m_unk364)
-                continue;
-
-            // pulse
-            if(gameObject->m_useAudioScale)
-                gameObject->setRScale(gameObject->m_customAudioScale ?
-                    std::lerp(gameObject->m_minAudioScale, gameObject->m_maxAudioScale, meteringValue - 0.1f) :
-                    meteringValue);
-
-            // fade/enter
-            bool ignoreFade = gameObject->m_ignoreFade;
-            bool unk365 = gameObject->m_unk365;
-            bool unk368 = gameObject->m_unk368;
-            bool unk3b0 = gameObject->m_unk3b0;
-            int activeEnterEffect = gameObject->m_activeEnterEffect;
-            int unk2ac = self->unk2AC;
-            gameObject->setOpacity(!ignoreFade && (((!unk365 || unk368 && unk3b0) || activeEnterEffect != 0 && activeEnterEffect != 1) || unk2ac != 1) ?
-                (GLubyte)std::round(relativeMod * 255.f) : 255u);
-
-            // idk
-            if(gameObject->m_glowUserBackgroundColour)
-                gameObject->setGlowColor(gameObject->m_useSpecialLight ? bgColor : transformedBgColor);
-
-            // invisible objects
-            if(gameObject->m_invisibleMode) {
-                float invisibleRelativeMod = getRelativeMod(self, objPos.x, 0.02f, 0.014285714f);
-                if(playerIsDead)
-                    gameObject->setGlowColor(transformedBgColor);
-                else {
-                    float valIdk = std::clamp(self->m_cameraX + boundRight - objPos.x > 0.f ?
-                        (self->m_cameraX + playerPos - objPos.x) / std::max(boundLeft, 1.f) :
-                        (objPos.x - self->m_cameraX - boundRight) / std::max(offsetBoundRight, 1.f), 0.f, 1.f);
-                    auto mainOpacity = std::min((0.05f + valIdk * 0.95f), invisibleRelativeMod);
-                    auto glowOpacity = std::min((0.15f + valIdk * 0.85f), invisibleRelativeMod);
-                    gameObject->setOpacity((GLubyte)(mainOpacity * 255.f));
-                    gameObject->setGlowOpacity((GLubyte)(glowOpacity * 255.f));
-
-                    if(mainOpacity <= 0.8f)
-                        gameObject->setGlowColor(transformedBgColor);
-                    else {
-                        auto useCol = transBgColorIsDark ? ccColor3B{255u, 255u, 255u} : lightBgColor;
-                        float t = 0.7f + (1.f - (mainOpacity - 0.8f) / 0.2f) * 0.3f;
-                        gd::GJEffectManager::getMixedColor(useCol, transformedBgColor, useCol, t);
-                        gameObject->setGlowColor(useCol);
-                    }
-                }
-            }
-
-            self->applyEnterEffect(gameObject);
-
-            bool isFlipping = self->m_mirrorTransition != 0.f && self->m_mirrorTransition != 1.f;
-            if(!isFlipping) {
-                if(!self->unk460)
-                    continue;
-                gameObject->setFlipX(gameObject->m_startFlipX);
-                gameObject->setFlipY(gameObject->m_startFlipY);
-                gameObject->setRotation(gameObject->m_rotation);
-                gameObject->setPosition(gameObject->getPosition());
-                continue;
-            }
-
-            // mirror animation
-            float t = self->m_cameraFlip == -1.f ? 1.f - self->m_mirrorTransition : self->m_mirrorTransition;
-            auto pos = gameObject->getPosition();
-            pos.x += ((screenLeft + screenRight) - (pos.x - self->m_cameraX) * 2.f) * t;
-            gameObject->setPosition(pos);
-            float rot = std::abs(self->getRotation());
-            bool isOnSide = rot == 90.f || rot == 270.f;
-            if(self->m_cameraFlip == 1.f && self->m_mirrorTransition >= 0.5f ||
-               self->m_cameraFlip != 1.f && self->m_mirrorTransition <= 0.5f) {
-                if(isOnSide)
-                    gameObject->setFlipY(!gameObject->m_startFlipY);
-                else
-                    gameObject->setFlipX(!gameObject->m_startFlipX);
-                gameObject->setRotation(-gameObject->m_rotation);
-            }
-            else if(self->unk3EC && (self->m_cameraFlip != 1.f && self->m_mirrorTransition >= 0.5f ||
-                self->m_cameraFlip == 1.f && self->m_mirrorTransition <= 0.5f)) {
-                if(isOnSide)
-                    gameObject->setFlipY(gameObject->m_startFlipY);
-                else
-                    gameObject->setFlipX(gameObject->m_startFlipX);
-                gameObject->setRotation(self->m_cameraFlip == 1.f ? gameObject->m_rotation : -gameObject->m_rotation);
-            }
+            updateGameObject(self, gameObject, meteringValue,
+                transCol0, bgColor, transformedBgColor, lightBgColor,
+                screenLeft, screenRight, playerPos, boundLeft, boundRight, offsetBoundRight);
         }
         self->m_objectsToUpdate->removeAllObjects();
     }
