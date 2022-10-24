@@ -5,9 +5,7 @@
 #include "loading/loading.h"
 #include "rendering/rendering.h"
 
-#define DEBUG
-
-#ifdef DEBUG
+#ifdef CUSTOM_DEBUG
 #include <iostream>
 #include <fstream>
 #endif
@@ -41,7 +39,7 @@ void initThreadPool(HMODULE cocos2dModule) {
 }
 
 DWORD WINAPI mainThread(void* hModule) {
-#ifdef DEBUG
+#ifdef CUSTOM_DEBUG
     AllocConsole();
     std::ofstream conout("CONOUT$", std::ios::out);
     std::ifstream conin("CONIN$", std::ios::in);
@@ -49,6 +47,7 @@ DWORD WINAPI mainThread(void* hModule) {
     std::cin.rdbuf(conin.rdbuf());
 #endif
 
+#ifdef OPTIMIZATIONS
     auto base = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
 
     auto cocos2dModule = GetModuleHandle("libcocos2d.dll");
@@ -57,10 +56,11 @@ DWORD WINAPI mainThread(void* hModule) {
     initThreadPool(cocos2dModule);
     initLoadingOptimizations(base);
     initRenderingOptimizations(base, cocos2dModule);
+#endif
 
     MH_EnableHook(MH_ALL_HOOKS);
 
-#ifdef DEBUG
+#ifdef CUSTOM_DEBUG
     std::string input;
     std::getline(std::cin, input);
 

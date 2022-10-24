@@ -22,7 +22,8 @@ add_subdirectory(libraries/cocos-headers)
 target_link_libraries(${PROJECT_NAME} minhook cocos2d)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
-  RENDER_THREAD_BATCH_COUNT=10
+  OPTIMIZATIONS
+  CUSTOM_DEBUG
 )
 
 set(TRACY_ENABLE ON)

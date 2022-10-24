@@ -303,6 +303,14 @@ void (__thiscall* PlayLayer_updateVisibility)(gd::PlayLayer*);
 void __fastcall PlayLayer_updateVisibility_H(gd::PlayLayer* self) {
     ZoneScoped;
 
+#ifdef CUSTOM_DEBUG
+    // use vanilla if show percentage is off
+    if(!gd::GameManager::sharedState()->getGameVariable("0040")) {
+        PlayLayer_updateVisibility(self);
+        return;
+    }
+#endif
+
     *getAt<float>(self->m_pEffectManager, 0x1b6c) = self->m_totalTime; // 0x1b6c = m_time
 
     self->m_pEffectManager->processColors();
@@ -395,6 +403,25 @@ void __fastcall PlayLayer_updateVisibility_H(gd::PlayLayer* self) {
     {
         ZoneScopedN("loop 2: deactivate previously visible objects");
         if(!self->unk310) {
+            /*auto threadPool = sharedPool();
+            int start = std::max(self->m_firstVisibleSection, 0);
+            int end = std::min(self->m_lastVisibleSection + 1, sectionCount);
+            BS::multi_future<void> job =
+                threadPool->parallelize_loop(start, end, [self, threadPool](int a, int b) {
+                    ZoneScopedN("job");
+                    for(int i = a; i < b; ++i) {
+                        auto container = reinterpret_cast<CCArray*>(self->m_pObjectContainerArrays->objectAtIndex(i));
+                        CCObject* obj;
+                        CCARRAY_FOREACH(container, obj) {
+                            auto gameObject = reinterpret_cast<gd::GameObject*>(obj);
+                            gameObject->deactivateObject(false);
+                        }
+                    }
+                });
+            {
+                ZoneScopedN("wait");
+                job.wait();
+            }*/
             for(auto i = self->m_firstVisibleSection; i <= self->m_lastVisibleSection; i++) {
                 if(i < 0 || i >= sectionCount)
                     continue;
@@ -419,6 +446,25 @@ void __fastcall PlayLayer_updateVisibility_H(gd::PlayLayer* self) {
 
     {
         ZoneScopedN("loop 4: update objects");
+        /*auto threadPool = sharedPool();
+        CCArray* array = self->m_objectsToUpdate;
+        CCObject** objects = array->data->arr;
+        BS::multi_future<void> job =
+            threadPool->parallelize_loop(0, array->data->num, [objects, self, meteringValue,
+                    transCol0, bgColor, transformedBgColor, lightBgColor, screenLeft, screenRight,
+                    playerPos, boundLeft, boundRight, offsetBoundRight](unsigned int a, unsigned int b) {
+                ZoneScopedN("update objects job");
+                for(unsigned int i = a; i < b; ++i) {
+                    auto gameObject = reinterpret_cast<gd::GameObject*>(objects[i]);
+                    updateGameObject(self, gameObject, meteringValue,
+                        transCol0, bgColor, transformedBgColor, lightBgColor,
+                        screenLeft, screenRight, playerPos, boundLeft, boundRight, offsetBoundRight);
+                }
+            });
+        {
+            ZoneScopedN("wait");
+            job.wait();
+        }*/
         CCARRAY_FOREACH(self->m_objectsToUpdate, obj) {
             auto gameObject = reinterpret_cast<gd::GameObject*>(obj);
             updateGameObject(self, gameObject, meteringValue,
