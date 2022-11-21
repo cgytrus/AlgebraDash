@@ -1,7 +1,6 @@
 #include "../../includes.h"
 
-void (__thiscall* CCSpriteBatchNode_draw)(CCSpriteBatchNode*);
-void __fastcall CCSpriteBatchNode_draw_H(CCSpriteBatchNode* self) {
+matdash::cc::thiscall<void> CCSpriteBatchNode_draw(CCSpriteBatchNode* self) {
     ZoneScoped;
 
     if(self->getTextureAtlas()->getTotalQuads() == 0)
@@ -36,11 +35,12 @@ void __fastcall CCSpriteBatchNode_draw_H(CCSpriteBatchNode* self) {
     ccGLBlendFunc(blendFunc.src, blendFunc.dst);
 
     self->getTextureAtlas()->drawQuads();
+
+    return {};
 }
 
 void (__thiscall* updateAtlasIndex)(CCSpriteBatchNode*, CCSprite*, int*);
-void (__thiscall* CCSpriteBatchNode_sortAllChildren)(CCSpriteBatchNode*);
-void __fastcall CCSpriteBatchNode_sortAllChildren_H(CCSpriteBatchNode* self) {
+matdash::cc::thiscall<void> CCSpriteBatchNode_sortAllChildren(CCSpriteBatchNode* self) {
     ZoneScoped;
 
     auto m_bReorderChildDirty = (bool*)((uintptr_t)self + 0xda);
@@ -120,6 +120,8 @@ void __fastcall CCSpriteBatchNode_sortAllChildren_H(CCSpriteBatchNode* self) {
 
     *m_bReorderChildDirty = false;
     *m_bManualSortAllChildrenDirty = false;
+
+    return {};
 }
 
 static inline void transformColor(ccColor3B& color, float h, float s, float v) {
@@ -299,15 +301,14 @@ void updateGameObject(gd::PlayLayer* self, gd::GameObject* gameObject, float met
     }
 }
 
-void (__thiscall* PlayLayer_updateVisibility)(gd::PlayLayer*);
-void __fastcall PlayLayer_updateVisibility_H(gd::PlayLayer* self) {
+matdash::cc::thiscall<void> PlayLayer_updateVisibility(gd::PlayLayer* self) {
     ZoneScoped;
 
 #ifdef CUSTOM_DEBUG
     // use vanilla if show percentage is off
     if(!gd::GameManager::sharedState()->getGameVariable("0040")) {
-        PlayLayer_updateVisibility(self);
-        return;
+        matdash::orig<&PlayLayer_updateVisibility>(self);
+        return {};
     }
 #endif
 
@@ -481,23 +482,18 @@ void __fastcall PlayLayer_updateVisibility_H(gd::PlayLayer* self) {
     self->unk460 = false;
     self->unk464->removeAllObjects();
     self->m_hasColors.clear();
+
+    return {};
 }
 
 #include "rendering.h"
-void initRenderingOptimizations(uintptr_t base, HMODULE cocos2dModule) {
-    MH_CreateHook(reinterpret_cast<void*>(GetProcAddress(cocos2dModule, "?draw@CCSpriteBatchNode@cocos2d@@UAEXXZ")),
-        reinterpret_cast<void*>(&CCSpriteBatchNode_draw_H),
-        reinterpret_cast<void**>(&CCSpriteBatchNode_draw));
+void initRenderingOptimizations() {
+    matdash::add_hook<&CCSpriteBatchNode_draw>(CC_ADDR("?draw@CCSpriteBatchNode@cocos2d@@UAEXXZ"));
+    matdash::add_hook<&CCSpriteBatchNode_sortAllChildren>(CC_ADDR("?sortAllChildren@CCSpriteBatchNode@cocos2d@@UAEXXZ"));
 
-    MH_CreateHook(reinterpret_cast<void*>(GetProcAddress(cocos2dModule, "?sortAllChildren@CCSpriteBatchNode@cocos2d@@UAEXXZ")),
-        reinterpret_cast<void*>(&CCSpriteBatchNode_sortAllChildren_H),
-        reinterpret_cast<void**>(&CCSpriteBatchNode_sortAllChildren));
+    updateAtlasIndex = reinterpret_cast<void(__thiscall*)(CCSpriteBatchNode*, CCSprite*, int*)>
+        (CC_ADDR("?updateAtlasIndex@CCSpriteBatchNode@cocos2d@@AAEXPAVCCSprite@2@PAH@Z"));
 
-    updateAtlasIndex = reinterpret_cast<void (__thiscall *)(cocos2d::CCSpriteBatchNode*, cocos2d::CCSprite*, int*)>
-        (GetProcAddress(cocos2dModule, "?updateAtlasIndex@CCSpriteBatchNode@cocos2d@@AAEXPAVCCSprite@2@PAH@Z"));
-
-    g_halfScreenWidth = reinterpret_cast<float*>(gd::base + 0x3222f4);
-    MH_CreateHook(reinterpret_cast<void*>(base + 0x205460),
-        reinterpret_cast<void*>(&PlayLayer_updateVisibility_H),
-        reinterpret_cast<void**>(&PlayLayer_updateVisibility));
+    //g_halfScreenWidth = reinterpret_cast<float*>(gd::base + 0x3222f4);
+    //matdash::add_hook<&PlayLayer_updateVisibility>(gd::base + 0x205460);
 }

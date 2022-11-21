@@ -5,35 +5,29 @@
 #include <memory>
 
 void initTracyHooks();
-int (__thiscall* CCApplication_setupVerticalSync)(CCApplication*);
-int __fastcall CCApplication_setupVerticalSync_H(CCApplication* self) {
+matdash::cc::thiscall<int> CCApplication_setupVerticalSync(CCApplication* self) {
     initTracyHooks();
-    int ret = CCApplication_setupVerticalSync(self);
-    return ret;
+    return matdash::orig<&CCApplication_setupVerticalSync>(self);
 }
 
-bool (__thiscall* CCEGLView_swapBuffers)(CCEGLView*);
-bool __fastcall CCEGLView_swapBuffers_H(CCEGLView* self) {
+matdash::cc::thiscall<bool> CCEGLView_swapBuffers(CCEGLView* self) {
     ZoneScopedN("CCEGLView::swapBuffers");
-    auto ret = CCEGLView_swapBuffers(self);
+    auto ret = matdash::orig<&CCEGLView_swapBuffers>(self);
     FrameMark;
     return ret;
 }
 
-#define GD base
-#define COCOS2D cocos2dBase
-#define COCOS2DSYM(name) GetProcAddress(cocos2dModule, name)
+#define GD gd::base
+#define COCOS2D reinterpret_cast<uintptr_t>(ccModule)
+#define COCOS2DSYM(name) CC_ADDR(name)
 
-#define PROFILER_HOOK(address, name, ret, callConvO, callConvH, argsO, argsH, argsC) \
-ret (callConvO* TracyConcat(profilerHook_, __LINE__)##_O)argsO; \
-ret callConvH TracyConcat(profilerHook_, __LINE__)##_H##argsH { \
+#define PROFILER_HOOK(address, name, ret, callConv, args, argsC) \
+matdash::cc::callConv<ret> TracyConcat(profilerHook_, __LINE__)##args { \
     ZoneScopedN(#name); \
-    return TracyConcat(profilerHook_, __LINE__)##_O##argsC; \
+    return matdash::orig<&TracyConcat(profilerHook_, __LINE__)>##argsC; \
 } \
-inline void TracyConcat(initProfilerHook_, __LINE__)(uintptr_t GD, HMODULE cocos2dModule, uintptr_t COCOS2D) { \
-    MH_CreateHook(reinterpret_cast<void*>(address), \
-        reinterpret_cast<void*>(&TracyConcat(profilerHook_, __LINE__)##_H), \
-        reinterpret_cast<void**>(&TracyConcat(profilerHook_, __LINE__)##_O)); \
+inline void TracyConcat(initProfilerHook_, __LINE__)() { \
+    matdash::add_hook<&TracyConcat(profilerHook_, __LINE__)>(address); \
 }
 #include "hooks.h"
 #undef PROFILER_HOOK
@@ -130,17 +124,10 @@ void* __cdecl reallocHook(void* memory, size_t newSize) {
 
 #endif
 
-#define PROFILER_HOOK(address, name, ret, callConvO, callConvH, argsO, argsH, argsC) TracyConcat(initProfilerHook_, __LINE__)(GD, cocos2dModule, COCOS2D);
+#define PROFILER_HOOK(address, name, ret, callConv, args, argsC) TracyConcat(initProfilerHook_, __LINE__)();
 void initTracyHooks() {
-    auto GD = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
-
-    auto cocos2dModule = GetModuleHandle("libcocos2d.dll");
-    auto COCOS2D = reinterpret_cast<uintptr_t>(cocos2dModule);
-
     // frame
-    MH_CreateHook(reinterpret_cast<void*>(COCOS2D + 0xc48b0),
-        reinterpret_cast<void*>(&CCEGLView_swapBuffers_H),
-        reinterpret_cast<void**>(&CCEGLView_swapBuffers));
+    matdash::add_hook<&CCEGLView_swapBuffers>(CC_ADDR("?swapBuffers@CCEGLView@cocos2d@@UAEXXZ"));
 
     #include "hooks.h"
 
@@ -157,16 +144,10 @@ void initTracyHooks() {
     patch(COCOS2D + 0x11d344, pointerToBytes(reinterpret_cast<uintptr_t>(&operatorDeleteHook)));
     patch(COCOS2D + 0x11d348, pointerToBytes(reinterpret_cast<uintptr_t>(&operatorNewHook)));
 #endif
-
-    MH_EnableHook(MH_ALL_HOOKS);
 }
 
 void initProfiler() {
-    auto address = reinterpret_cast<uintptr_t>(GetModuleHandle("libcocos2d.dll")) + 0xc1c20;
-    MH_CreateHook(reinterpret_cast<void*>(address),
-        reinterpret_cast<void*>(&CCApplication_setupVerticalSync_H),
-        reinterpret_cast<void**>(&CCApplication_setupVerticalSync));
-    MH_EnableHook(reinterpret_cast<void*>(address));
+    matdash::add_hook<&CCApplication_setupVerticalSync>(CC_ADDR("?setupVerticalSync@CCApplication@cocos2d@@QAEXXZ"));
 }
 
 #endif

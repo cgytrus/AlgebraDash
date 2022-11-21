@@ -13,3 +13,9 @@
 [submodule "libraries/thread-pool"]
 	path = libraries/thread-pool
 	url = https://github.com/bshoshany/thread-pool
+[submodule "libraries/mat-dash"]
+	path = libraries/mat-dash
+	url = https://github.com/matcool/mat-dash
+[submodule "libraries/hackpro"]
+	path = libraries/hackpro
+	url = https://github.com/absoIute/Mega-Hack-Extensions

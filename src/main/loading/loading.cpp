@@ -289,8 +289,7 @@ void runLoadAssets(gd::LoadingLayer* self) {
     gd::GameManager::sharedState()->getActionManager()->addAction(sequence, self, false);
 }
 
-void (__thiscall* LoadingLayer_loadAssets)(gd::LoadingLayer*);
-void __fastcall LoadingLayer_loadAssets_H(gd::LoadingLayer* self) {
+matdash::cc::thiscall<void> LoadingLayer_loadAssets(gd::LoadingLayer* self) {
     ZoneScoped;
     if(self->m_nLoadStep <= 0) {
         load(self);
@@ -306,11 +305,11 @@ void __fastcall LoadingLayer_loadAssets_H(gd::LoadingLayer* self) {
     }
     else
         finishLoading(self);
+
+    return {};
 }
 
 #include "loading.h"
-void initLoadingOptimizations(uintptr_t base) {
-    MH_CreateHook(reinterpret_cast<void*>(base + 0x18c8e0),
-        reinterpret_cast<void*>(&LoadingLayer_loadAssets_H),
-        reinterpret_cast<void**>(&LoadingLayer_loadAssets));
+void initLoadingOptimizations() {
+    matdash::add_hook<&LoadingLayer_loadAssets>(gd::base + 0x18c8e0);
 }

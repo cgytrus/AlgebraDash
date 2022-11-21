@@ -1,11 +1,14 @@
 #include "../includes.h"
 
+#include <matdash/boilerplate.hpp>
+
 #include "profiler/profiler.h"
 
 #include "loading/loading.h"
 #include "rendering/rendering.h"
 
 #ifdef CUSTOM_DEBUG
+#include <matdash/console.hpp>
 #include <iostream>
 #include <fstream>
 #endif
@@ -14,9 +17,8 @@ static BS::thread_pool* _sharedPool;
 BS::thread_pool* sharedPool() { return _sharedPool; }
 
 bool _created = false;
-bool (__thiscall* CCEGLView_windowShouldClose)(CCEGLView*);
-bool __fastcall CCEGLView_windowShouldClose_H(CCEGLView* self) {
-    auto shouldClose = CCEGLView_windowShouldClose(self);
+matdash::cc::thiscall<bool> CCEGLView_windowShouldClose(CCEGLView* self) {
+    auto shouldClose = matdash::orig<&CCEGLView_windowShouldClose>(self);
     if(_created) {
         if(shouldClose && _sharedPool)
             delete _sharedPool;
@@ -32,55 +34,34 @@ bool __fastcall CCEGLView_windowShouldClose_H(CCEGLView* self) {
     return shouldClose;
 }
 
-void initThreadPool(HMODULE cocos2dModule) {
-    MH_CreateHook(reinterpret_cast<void*>(GetProcAddress(cocos2dModule, "?windowShouldClose@CCEGLView@cocos2d@@QAE_NXZ")),
-        reinterpret_cast<void*>(&CCEGLView_windowShouldClose_H),
-        reinterpret_cast<void**>(&CCEGLView_windowShouldClose));
+void initThreadPool() {
+    matdash::add_hook<&CCEGLView_windowShouldClose>(CC_ADDR("?windowShouldClose@CCEGLView@cocos2d@@QAE_NXZ"));
 }
 
-DWORD WINAPI mainThread(void* hModule) {
+void mod_main(HMODULE hModule) {
+    ccModule = GetModuleHandle("libcocos2d.dll");
+
+#ifdef TRACY_ENABLE
+    initProfiler();
+#endif
+
 #ifdef CUSTOM_DEBUG
-    AllocConsole();
-    std::ofstream conout("CONOUT$", std::ios::out);
-    std::ifstream conin("CONIN$", std::ios::in);
-    std::cout.rdbuf(conout.rdbuf());
-    std::cin.rdbuf(conin.rdbuf());
+    auto console = new matdash::Console();
 #endif
 
 #ifdef OPTIMIZATIONS
-    auto base = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
-
-    auto cocos2dModule = GetModuleHandle("libcocos2d.dll");
-    auto cocos2dBase = reinterpret_cast<uintptr_t>(cocos2dModule);
-
-    initThreadPool(cocos2dModule);
-    initLoadingOptimizations(base);
-    initRenderingOptimizations(base, cocos2dModule);
+    initThreadPool();
+    initLoadingOptimizations();
+    initRenderingOptimizations();
 #endif
-
-    MH_EnableHook(MH_ALL_HOOKS);
 
 #ifdef CUSTOM_DEBUG
     std::string input;
     std::getline(std::cin, input);
 
     MH_Uninitialize();
-    conout.close();
-    conin.close();
+    delete console;
     FreeConsole();
-    FreeLibraryAndExitThread((HMODULE)hModule, 0);
+    FreeLibraryAndExitThread(hModule, 0);
 #endif
-
-    return 0;
-}
-
-BOOL APIENTRY DllMain(HMODULE handle, DWORD reason, LPVOID reserved) {
-    if(reason == DLL_PROCESS_ATTACH) {
-        MH_Initialize();
-#ifdef TRACY_ENABLE
-        initProfiler();
-#endif
-        CreateThread(nullptr, 0x100, mainThread, handle, 0, nullptr);
-    }
-    return TRUE;
 }

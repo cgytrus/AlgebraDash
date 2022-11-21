@@ -1,16 +1,16 @@
 #include "../../includes.h"
 
-#define PROFILER_HOOK_THIS_ARGS(address, ret, name, argsC, ...) PROFILER_HOOK(address, name, ret, __thiscall, __fastcall, (void*, __VA_ARGS__), (void* self, void*, __VA_ARGS__), argsC)
-#define PROFILER_HOOK_THIS(address, ret, name) PROFILER_HOOK(address, name, ret, __thiscall, __fastcall, (void*), (void* self), (self))
-#define PROFILER_HOOK_SAME_ARGS(address, ret, callConv, name, argsC, ...) PROFILER_HOOK(address, name, ret, callConv, callConv, (__VA_ARGS__), (__VA_ARGS__), argsC)
-#define PROFILER_HOOK_SAME(address, ret, callConv, name) PROFILER_HOOK(address, name, ret, callConv, callConv, (), (), ())
+#define PROFILER_HOOK_THIS_ARGS(address, ret, name, argsC, ...) PROFILER_HOOK(address, name, ret, thiscall, (void* self, __VA_ARGS__), argsC)
+#define PROFILER_HOOK_THIS(address, ret, name) PROFILER_HOOK(address, name, ret, thiscall, (void* self), (self))
+#define PROFILER_HOOK_SAME_ARGS(address, ret, callConv, name, argsC, ...) PROFILER_HOOK(address, name, ret, callConv, (__VA_ARGS__), argsC)
+#define PROFILER_HOOK_SAME(address, ret, callConv, name) PROFILER_HOOK(address, name, ret, callConv, (), ())
 
 // haha rip dll size
 
 // pre frame
 PROFILER_HOOK_THIS(COCOS2DSYM("?pollEvents@CCEGLView@cocos2d@@QAEXXZ"), void, cocos2d::CCEGLView::pollEvents)
-PROFILER_HOOK_SAME_ARGS(COCOS2D + 0x110dc0, void, __cdecl, cocos2d::CCEGLView::FUN_10110dc0, (idk), int idk)
-PROFILER_HOOK_SAME_ARGS(COCOS2D + 0x111a80, void, __cdecl, cocos2d::CCEGLView::FUN_10111a80, (idk1, idk2, idk3, idk4, idk5), int idk1, int idk2, int idk3, int idk4, int idk5)
+PROFILER_HOOK_SAME_ARGS(COCOS2D + 0x110dc0, void, c_decl, cocos2d::CCEGLView::FUN_10110dc0, (idk), int idk)
+PROFILER_HOOK_SAME_ARGS(COCOS2D + 0x111a80, void, c_decl, cocos2d::CCEGLView::FUN_10111a80, (idk1, idk2, idk3, idk4, idk5), int idk1, int idk2, int idk3, int idk4, int idk5)
 PROFILER_HOOK_THIS_ARGS(COCOS2DSYM("?setDeltaTime@CCDirector@cocos2d@@QAEXM@Z"), void, cocos2d::CCDirector::setDeltaTime, (self, dt), float dt)
 
 // actual frame
@@ -89,18 +89,18 @@ PROFILER_HOOK_THIS(GD + 0x16b7c0, void, gd::LevelEditorLayer::draw)
 PROFILER_HOOK_THIS(GD + 0x18c8e0, void, gd::LoadingLayer::loadAssets)
 PROFILER_HOOK_THIS_ARGS(COCOS2DSYM("?addImage@CCTextureCache@cocos2d@@QAEPAVCCTexture2D@2@PBD_N@Z"), CCTexture2D*, cocos2d::CCTextureCache::addImage, (self, path, idk), const char* path, bool idk)
 PROFILER_HOOK_THIS_ARGS(COCOS2DSYM("?addImageAsync@CCTextureCache@cocos2d@@QAEXPBDPAVCCObject@2@P832@AEX1@Z@Z"), CCTexture2D*, cocos2d::CCTextureCache::addImageAsync, (self, path, target, selector), const char* path, CCObject* target, SEL_CallFuncO selector)
-PROFILER_HOOK_SAME_ARGS(COCOS2D + 0xec7c0, void*, __cdecl, cocos2d::CCTextureCache::loadImage, (data), void* data)
-PROFILER_HOOK_SAME_ARGS(COCOS2D + 0xec9a0, void, __cdecl, cocos2d::CCTextureCache::loadImageData, (pAsyncStruct), void* pAsyncStruct)
+PROFILER_HOOK_SAME_ARGS(COCOS2D + 0xec7c0, void*, c_decl, cocos2d::CCTextureCache::loadImage, (data), void* data)
+PROFILER_HOOK_SAME_ARGS(COCOS2D + 0xec9a0, void, c_decl, cocos2d::CCTextureCache::loadImageData, (pAsyncStruct), void* pAsyncStruct)
 PROFILER_HOOK_THIS_ARGS(COCOS2DSYM("?addSpriteFramesWithDictionary@CCSpriteFrameCache@cocos2d@@AAEXPAVCCDictionary@2@PAVCCTexture2D@2@@Z"), void, cocos2d::CCSpriteFrameCache::addSpriteFramesWithDictionary, (self, dict, texture), CCDictionary* dict, CCTexture2D* texture)
 PROFILER_HOOK_THIS_ARGS(COCOS2DSYM("?addSpriteFramesWithFile@CCSpriteFrameCache@cocos2d@@QAEXPBD0@Z"), void, cocos2d::CCSpriteFrameCache::addSpriteFramesWithFile, (self, plistPath, texturePath), const char* plistPath, const char* texturePath)
 PROFILER_HOOK_THIS_ARGS(COCOS2DSYM("?addSpriteFramesWithFile@CCSpriteFrameCache@cocos2d@@QAEXPBD@Z"), void, cocos2d::CCSpriteFrameCache::addSpriteFramesWithFile, (self, plistPath), const char* plistPath)
 PROFILER_HOOK_THIS_ARGS(COCOS2DSYM("?addSpriteFramesWithFile@CCSpriteFrameCache@cocos2d@@QAEXPBDPAVCCTexture2D@2@@Z"), void, cocos2d::CCSpriteFrameCache::addSpriteFramesWithFile, (self, plistPath, texture), const char* plistPath, CCTexture2D* texture)
-PROFILER_HOOK_SAME_ARGS(COCOS2DSYM("?create@CCLabelBMFont@cocos2d@@SAPAV12@PBD0MW4CCTextAlignment@2@VCCPoint@2@@Z"), CCLabelBMFont*, __cdecl, cocos2d::CCLabelBMFont::create, (idk1, idk2, idk3, idk4, idk5), const char* idk1, const char* idk2, float idk3, CCTextAlignment idk4, CCPoint idk5)
+PROFILER_HOOK_SAME_ARGS(COCOS2DSYM("?create@CCLabelBMFont@cocos2d@@SAPAV12@PBD0MW4CCTextAlignment@2@VCCPoint@2@@Z"), CCLabelBMFont*, c_decl, cocos2d::CCLabelBMFont::create, (idk1, idk2, idk3, idk4, idk5), const char* idk1, const char* idk2, float idk3, CCTextAlignment idk4, CCPoint idk5)
 PROFILER_HOOK_THIS(GD + 0x25520, void, gd::GameSoundManager::asynchronousSetup)
 PROFILER_HOOK_THIS(GD + 0xc9420, void, gd::GameManager::FUN_0049420)
 PROFILER_HOOK_THIS(GD + 0xa8cb0, void, gd::GameLevelManager::FUN_004a8cb0)
 PROFILER_HOOK_THIS_ARGS(COCOS2DSYM("?initWithImage@CCTexture2D@cocos2d@@QAE_NPAVCCImage@2@@Z"), void, cocos2d::CCTexture2D::initWithImage, (self, image), CCImage* image)
-PROFILER_HOOK_SAME_ARGS(COCOS2DSYM("?create@CCBMFontConfiguration@cocos2d@@SAPAV12@PBD@Z"), CCBMFontConfiguration*, __cdecl, cocos2d::CCBMFontConfiguration::create, (fntFile), const char* fntFile)
+PROFILER_HOOK_SAME_ARGS(COCOS2DSYM("?create@CCBMFontConfiguration@cocos2d@@SAPAV12@PBD@Z"), CCBMFontConfiguration*, c_decl, cocos2d::CCBMFontConfiguration::create, (fntFile), const char* fntFile)
 PROFILER_HOOK_THIS_ARGS(COCOS2DSYM("?parseConfigFile@CCBMFontConfiguration@cocos2d@@AAEPAV?$set@IU?$less@I@std@@V?$allocator@I@2@@std@@PBD@Z"), void*, cocos2d::CCBMFontConfiguration::parseConfigFile, (self, fntFile), const char* fntFile)
 PROFILER_HOOK_THIS_ARGS(COCOS2DSYM("?initWithTexture@CCSpriteBatchNode@cocos2d@@QAE_NPAVCCTexture2D@2@I@Z"), bool, cocos2d::CCSpriteBatchNode::initWithTexture, (self, texture, capacity), CCTexture2D* texture, unsigned int capacity)
 PROFILER_HOOK_THIS_ARGS(COCOS2DSYM("?initWithTexture@CCSprite@cocos2d@@UAE_NPAVCCTexture2D@2@ABVCCRect@2@_N@Z"), bool, cocos2d::CCSprite::initWithTexture, (self, texture, rect, rotated), CCTexture2D* texture, CCRect* rect, bool rotated)
