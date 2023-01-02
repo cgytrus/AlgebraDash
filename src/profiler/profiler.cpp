@@ -1,6 +1,6 @@
 #ifdef TRACY_ENABLE
 
-#include "../../includes.h"
+#include <includes.hpp>
 
 void initTracyHooks();
 matdash::cc::thiscall<int> CCApplication_setupVerticalSync(CCApplication* self) {
@@ -37,9 +37,10 @@ void initTracyHooks() {
     // frame
     matdash::add_hook<&CCEGLView_swapBuffers>(CC_ADDR("?swapBuffers@CCEGLView@cocos2d@@UAEXXZ"));
 
-    #include "hooks.h"
+    #include <profiler/hooks.hpp>
 }
 
+#include <profiler/profiler.hpp>
 void initProfiler() {
     matdash::add_hook<&CCApplication_setupVerticalSync>(CC_ADDR("?setupVerticalSync@CCApplication@cocos2d@@QAEXXZ"));
 }

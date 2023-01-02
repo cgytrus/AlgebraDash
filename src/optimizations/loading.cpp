@@ -1,5 +1,10 @@
-#include "../../includes.h"
+#include <includes.hpp>
 #include <mutex>
+
+#include <optimizations/loading.hpp>
+#include <config.hpp>
+
+bool ad::LoadingOptimization::_enabled = true;
 
 const CCTexture2DPixelFormat kCCTexture2DPixelFormat_DontChange = (CCTexture2DPixelFormat)-1;
 
@@ -290,6 +295,11 @@ void runLoadAssets(gd::LoadingLayer* self) {
 }
 
 matdash::cc::thiscall<void> LoadingLayer_loadAssets(gd::LoadingLayer* self) {
+    if(!ad::LoadingOptimization::getEnabled()) {
+        matdash::orig<&LoadingLayer_loadAssets>(self);
+        return {};
+    }
+
     ZoneScoped;
     if(self->m_nLoadStep <= 0) {
         load(self);
@@ -309,7 +319,15 @@ matdash::cc::thiscall<void> LoadingLayer_loadAssets(gd::LoadingLayer* self) {
     return {};
 }
 
-#include "loading.h"
-void initLoadingOptimizations() {
+void ad::LoadingOptimization::init() {
     matdash::add_hook<&LoadingLayer_loadAssets>(gd::base + 0x18c8e0);
+}
+void ad::LoadingOptimization::load(std::istream& config) {
+    config >> ad::LoadingOptimization::_enabled;
+}
+void ad::LoadingOptimization::save(std::ostream& config) {
+    config << ad::LoadingOptimization::_enabled;
+}
+void ad::LoadingOptimization::initMegahack(MegaHackExt::Window& window) {
+    ad::config::addCheckbox<ad::LoadingOptimization::_enabled>(window, "Loading");
 }

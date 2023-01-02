@@ -1,6 +1,6 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-#include "patcher.h"
+#include <util/patcher.hpp>
 #include <unordered_map>
 
 inline std::vector<uint8_t> patchBytesEx(uintptr_t const address, std::vector<uint8_t> const& bytes) {

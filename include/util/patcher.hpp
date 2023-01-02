@@ -1,5 +1,4 @@
-#ifndef __PATCHER_H
-#define __PATCHER_H
+#pragma once
 
 #include <vector>
 
@@ -8,5 +7,3 @@ void unpatch(uintptr_t addr);
 void swapBytes(uintptr_t addrLeft, uintptr_t addrRight, size_t size);
 
 std::vector<uint8_t> pointerToBytes(uintptr_t ptr);
-
-#endif

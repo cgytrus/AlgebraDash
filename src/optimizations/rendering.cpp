@@ -1,6 +1,16 @@
-#include "../../includes.h"
+#include <includes.hpp>
+
+#include <optimizations/rendering.hpp>
+#include <config.hpp>
+
+bool ad::RenderingOptimization::_enabled = true;
 
 matdash::cc::thiscall<void> CCSpriteBatchNode_draw(CCSpriteBatchNode* self) {
+    if(!ad::RenderingOptimization::getEnabled()) {
+        matdash::orig<&CCSpriteBatchNode_draw>(self);
+        return {};
+    }
+
     ZoneScoped;
 
     if(self->getTextureAtlas()->getTotalQuads() == 0)
@@ -41,6 +51,11 @@ matdash::cc::thiscall<void> CCSpriteBatchNode_draw(CCSpriteBatchNode* self) {
 
 void (__thiscall* updateAtlasIndex)(CCSpriteBatchNode*, CCSprite*, int*);
 matdash::cc::thiscall<void> CCSpriteBatchNode_sortAllChildren(CCSpriteBatchNode* self) {
+    if(!ad::RenderingOptimization::getEnabled()) {
+        matdash::orig<&CCSpriteBatchNode_sortAllChildren>(self);
+        return {};
+    }
+
     ZoneScoped;
 
     auto m_bReorderChildDirty = (bool*)((uintptr_t)self + 0xda);
@@ -486,8 +501,7 @@ matdash::cc::thiscall<void> CCSpriteBatchNode_sortAllChildren(CCSpriteBatchNode*
 //    return {};
 //}
 
-#include "rendering.h"
-void initRenderingOptimizations() {
+void ad::RenderingOptimization::init() {
     matdash::add_hook<&CCSpriteBatchNode_draw>(CC_ADDR("?draw@CCSpriteBatchNode@cocos2d@@UAEXXZ"));
     matdash::add_hook<&CCSpriteBatchNode_sortAllChildren>(CC_ADDR("?sortAllChildren@CCSpriteBatchNode@cocos2d@@UAEXXZ"));
 
@@ -496,4 +510,13 @@ void initRenderingOptimizations() {
 
     //g_halfScreenWidth = reinterpret_cast<float*>(gd::base + 0x3222f4);
     //matdash::add_hook<&PlayLayer_updateVisibility>(gd::base + 0x205460);
+}
+void ad::RenderingOptimization::load(std::istream& config) {
+    config >> ad::RenderingOptimization::_enabled;
+}
+void ad::RenderingOptimization::save(std::ostream& config) {
+    config << ad::RenderingOptimization::_enabled;
+}
+void ad::RenderingOptimization::initMegahack(MegaHackExt::Window& window) {
+    ad::config::addCheckbox<ad::RenderingOptimization::_enabled>(window, "Rendering");
 }

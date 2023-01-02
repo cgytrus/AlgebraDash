@@ -4,10 +4,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(AlgebraDash)
 
-file(GLOB SHARED_SOURCES src/*.cpp)
-file(GLOB_RECURSE MAIN_SOURCES src/main/*.cpp)
-
-add_library(${PROJECT_NAME} SHARED ${SHARED_SOURCES} ${MAIN_SOURCES})
+file(GLOB_RECURSE SOURCES src/*.cpp)
+add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
 # this is so stupid
 set(CMAKE_SIZEOF_VOID_P 4)
@@ -20,6 +18,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
 endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE
+  include
   libraries/minhook/include
   libraries/gd.h/include
   libraries/gd.h
