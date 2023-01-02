@@ -39,8 +39,6 @@ void initThreadPool() {
 }
 
 void mod_main(HMODULE hModule) {
-    ccModule = GetModuleHandle("libcocos2d.dll");
-
 #ifdef TRACY_ENABLE
     initProfiler();
 #endif

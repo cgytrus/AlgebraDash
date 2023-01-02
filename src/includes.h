@@ -33,6 +33,5 @@ inline static T getVftable(void* base, uintptr_t offset) {
     return *reinterpret_cast<T*>(*reinterpret_cast<uintptr_t*>(base) + offset);
 }
 
-static HMODULE ccModule;
-
+static HMODULE ccModule = GetModuleHandle("libcocos2d.dll");
 #define CC_ADDR(x) GetProcAddress(ccModule, x)
