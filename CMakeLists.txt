@@ -4,8 +4,18 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(AlgebraDash)
 
-file(GLOB_RECURSE SOURCES src/*.cpp)
-add_library(${PROJECT_NAME} SHARED ${SOURCES})
+add_library(XInput9_1_0 SHARED
+  src/loader.cpp
+  res/XInput9_1_0.def
+)
+
+add_library(${PROJECT_NAME} SHARED
+  src/main.cpp
+  src/optimizations/loading.cpp
+  src/optimizations/rendering.cpp
+  src/profiler/profiler.cpp
+  src/util/patcher.cpp
+)
 
 # this is so stupid
 set(CMAKE_SIZEOF_VOID_P 4)
