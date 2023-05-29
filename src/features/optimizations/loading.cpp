@@ -118,8 +118,9 @@ public:
     }
 };
 
-int maxProgress = 0;
-class $modify(LoadingLayer) {
+struct OptimizedLoadingLayer : geode::Modify<OptimizedLoadingLayer, LoadingLayer> {
+    int m_maxProgress = 0;
+
     void load(LoadingLayer* self) {
         ZoneScoped;
         auto textureCache = reinterpret_cast<CustomCCTextureCache*>(CCTextureCache::sharedTextureCache());
@@ -191,7 +192,7 @@ class $modify(LoadingLayer) {
             textureCache->addFont("bigFont.fnt");
         }
 
-        maxProgress = sharedPool()->get_tasks_total();
+        m_fields->m_maxProgress = sharedPool()->get_tasks_total();
 
         // 9
         {
@@ -243,34 +244,35 @@ class $modify(LoadingLayer) {
     void updateProgressBar() {
         ZoneScoped;
         auto sliderX = m_sliderGrooveXPos;
-
-        m_unknown2 = true;
-
-        float progress = (1.f - (float)sharedPool()->get_tasks_total() / maxProgress) * sliderX;
+        float progress = (1.f - (float)sharedPool()->get_tasks_total() / m_fields->m_maxProgress) * sliderX;
         if(progress <= sliderX)
             sliderX = progress;
-
         m_sliderBar->setTextureRect({ 0.f, 0.f, sliderX, m_sliderGrooveHeight });
     }
 
     void loadAssets() {
-        LoadingLayer::loadAssets();
-        return;
-
         ZoneScoped;
+
         if(m_loadStep <= 0) {
             load(this);
-            m_loadStep = 14;
+            m_loadStep = 15;
         }
 
         reinterpret_cast<CustomCCTextureCache*>(CCTextureCache::sharedTextureCache())->finishAddImage();
 
         if(sharedPool()->get_tasks_total() > 0) {
             ZoneScopedN("wait");
+            LoadingLayer::loadAssets();
             updateProgressBar();
+            return;
         }
-        else {
+        {
+            ZoneScopedN("geode assets");
+            Loader::get()->updateResources(true);
+        }
+        {
             ZoneScopedN("load assets 14");
+            m_loadStep = 14;
             LoadingLayer::loadAssets();
         }
     }

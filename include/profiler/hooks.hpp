@@ -82,6 +82,7 @@ PROFILER_HOOK(void, LevelEditorLayer, draw)
 
 // loading
 PROFILER_HOOK(void, LoadingLayer, loadAssets)
+PROFILER_HOOK(void, LoadingLayer, loadingFinished)
 PROFILER_HOOK(CCTexture2D*, CCTextureCache, addImage, const char*, bool)
 PROFILER_HOOK(void, CCTextureCache, addImageAsync, const char*, CCObject*, SEL_CallFuncO)
  // TODO address private // PROFILER_HOOK(void*, CCTextureCache, loadImage)
