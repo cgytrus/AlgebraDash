@@ -6,8 +6,8 @@ project(AlgebraDash VERSION 0.0.3)
 
 add_library(${PROJECT_NAME} SHARED
   src/main.cpp
-#  src/features/optimizations/loading.cpp
-#  src/features/optimizations/rendering.cpp
+  src/features/optimizations/loading.cpp
+  src/features/optimizations/rendering.cpp
   src/profiler/profiler.cpp
 )
 
@@ -29,17 +29,17 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME} geode-sdk)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
-#  OPTIMIZATIONS
+  OPTIMIZATIONS
 #  CUSTOM_DEBUG
 )
 
-set(TRACY_ENABLE ON CACHE BOOL "" TRUE)
-set(TRACY_ON_DEMAND ON CACHE BOOL "" TRUE)
+set(TRACY_ENABLE OFF)
+set(TRACY_ON_DEMAND ON)
 
-set(TRACY_ONLY_LOCALHOST OFF CACHE BOOL "" TRUE)
+set(TRACY_ONLY_LOCALHOST OFF)
 
-set(TRACY_NO_CALLSTACK OFF CACHE BOOL "" TRUE)
-set(TRACY_CALLSTACK OFF CACHE BOOL "" TRUE)
+set(TRACY_NO_CALLSTACK OFF)
+set(TRACY_CALLSTACK OFF)
 
 add_subdirectory(libraries/tracy)
 target_include_directories(${PROJECT_NAME} PRIVATE libraries/tracy/public/tracy)

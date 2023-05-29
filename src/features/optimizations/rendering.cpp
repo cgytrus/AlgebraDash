@@ -1,7 +1,5 @@
 #include <includes.hpp>
 
-#include <features/optimizations/rendering.hpp>
-
 #include <Geode/modify/CCSpriteBatchNode.hpp>
 
 class meWhen;
@@ -133,6 +131,3 @@ class $modify(CCSpriteBatchNode) {
         //self.setEnabled(true);
     }
 };
-
-void ad::RenderingOptimization::init() {
-}

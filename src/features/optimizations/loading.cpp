@@ -1,8 +1,6 @@
 #include <includes.hpp>
 #include <mutex>
 
-#include <features/optimizations/loading.hpp>
-
 #include <Geode/modify/LoadingLayer.hpp>
 
 const CCTexture2DPixelFormat kCCTexture2DPixelFormat_DontChange = (CCTexture2DPixelFormat)-1;
@@ -256,6 +254,9 @@ class $modify(LoadingLayer) {
     }
 
     void loadAssets() {
+        LoadingLayer::loadAssets();
+        return;
+
         ZoneScoped;
         if(m_loadStep <= 0) {
             load(this);
@@ -280,6 +281,3 @@ class $modify(LoadingLayer) {
         //self.setEnabled(true);
     }
 };
-
-void ad::LoadingOptimization::init() {
-}
