@@ -1,48 +1,32 @@
 #ifdef TRACY_ENABLE
 
 #include <includes.hpp>
+#include <Geode/Modify.hpp>
 
-void initTracyHooks();
-matdash::cc::thiscall<int> CCApplication_setupVerticalSync(CCApplication* self) {
-    initTracyHooks();
-    return matdash::orig<&CCApplication_setupVerticalSync>(self);
-}
-
-matdash::cc::thiscall<void> CCEGLView_swapBuffers(CCEGLView* self) {
-    ZoneScopedN("CCEGLView::swapBuffers");
-    matdash::orig<&CCEGLView_swapBuffers>(self);
-    FrameMark;
-    return {};
-}
-
-template<template<class> class Conv, class Ret, const char* Name, class... Args>
-Conv<Ret> profilerHook(Args&... args) {
-    ZoneScopedN(Name);
-    if constexpr (std::is_same_v<Ret, void>) {
-        matdash::orig<&profilerHook<Conv, Ret, Name, Args...>>(std::forward<Args>(args)...);
-        return {};
+class $modify(CCEGLView) {
+    void swapBuffers() {
+        ZoneScopedN("CCEGLView::swapBuffers");
+        CCEGLView::swapBuffers();
+        FrameMark;
     }
-    else
-        return matdash::orig<&profilerHook<Conv, Ret, Name, Args...>>(std::forward<Args>(args)...);
-}
+};
 
-#define GD gd::base
-#define COCOS2D reinterpret_cast<uintptr_t>(ccModule)
-#define COCOS2DSYM(name) CC_ADDR(name)
-#define PROFILER_HOOK(address, ret, conv, name, ...) { \
-    static char nameStr[] = #name; \
-    matdash::add_hook<&profilerHook<matdash::cc::conv, ret, nameStr, __VA_ARGS__>>(address); \
-}
-void initTracyHooks() {
-    // frame
-    matdash::add_hook<&CCEGLView_swapBuffers>(CC_ADDR("?swapBuffers@CCEGLView@cocos2d@@UAEXXZ"));
+#define PROFILER_HOOK_3(Ret_, Class_, Name_) class GEODE_CRTP2(GEODE_CONCAT(profilerHook, __LINE__), Class_) { \
+    Ret_ Name_() { ZoneScopedN(#Class_ "::" #Name_); return Class_::Name_(); } };
+#define PROFILER_HOOK_4(Ret_, Class_, Name_, A_) class GEODE_CRTP2(GEODE_CONCAT(profilerHook, __LINE__), Class_) { \
+    Ret_ Name_(A_ a) { ZoneScopedN(#Class_ "::" #Name_); return Class_::Name_(a); } };
+#define PROFILER_HOOK_5(Ret_, Class_, Name_, A_, B_) class GEODE_CRTP2(GEODE_CONCAT(profilerHook, __LINE__), Class_) { \
+    Ret_ Name_(A_ a, B_ b) { ZoneScopedN(#Class_ "::" #Name_); return Class_::Name_(a, b); } };
+#define PROFILER_HOOK_6(Ret_, Class_, Name_, A_, B_, C_) class GEODE_CRTP2(GEODE_CONCAT(profilerHook, __LINE__), Class_) { \
+    Ret_ Name_(A_ a, B_ b, C_ c) { ZoneScopedN(#Class_ "::" #Name_); return Class_::Name_(a, b, c); } };
+#define PROFILER_HOOK_7(Ret_, Class_, Name_, A_, B_, C_, D_) class GEODE_CRTP2(GEODE_CONCAT(profilerHook, __LINE__), Class_) { \
+    Ret_ Name_(A_ a, B_ b, C_ c, D_ d) { ZoneScopedN(#Class_ "::" #Name_); return Class_::Name_(a, b, c, d); } };
+#define PROFILER_HOOK_8(Ret_, Class_, Name_, A_, B_, C_, D_, E_) class GEODE_CRTP2(GEODE_CONCAT(profilerHook, __LINE__), Class_) { \
+    Ret_ Name_(A_ a, B_ b, C_ c, D_ d, E_ e) { ZoneScopedN(#Class_ "::" #Name_); return Class_::Name_(a, b, c, d, e); } };
+#define PROFILER_HOOK_9(Ret_, Class_, Name_, A_, B_, C_, D_, E_, F_) class GEODE_CRTP2(GEODE_CONCAT(profilerHook, __LINE__), Class_) { \
+    Ret_ Name_(A_ a, B_ b, C_ c, D_ d, E_ e, F_ f) { ZoneScopedN(#Class_ "::" #Name_); return Class_::Name_(a, b, c, d, e, f); } };
+#define PROFILER_HOOK(...) GEODE_INVOKE(GEODE_CONCAT(PROFILER_HOOK_, GEODE_NUMBER_OF_ARGS(__VA_ARGS__)), __VA_ARGS__)
 
-    #include <profiler/hooks.hpp>
-}
-
-#include <profiler/profiler.hpp>
-void initProfiler() {
-    matdash::add_hook<&CCApplication_setupVerticalSync>(CC_ADDR("?setupVerticalSync@CCApplication@cocos2d@@QAEXXZ"));
-}
+#include <profiler/hooks.hpp>
 
 #endif
