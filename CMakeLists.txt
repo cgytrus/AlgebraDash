@@ -23,7 +23,7 @@ setup_geode_mod(${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
   include
-  libraries/thread-pool
+  libraries/thread-pool/include
 )
 
 target_link_libraries(${PROJECT_NAME} geode-sdk)
@@ -33,7 +33,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 #  CUSTOM_DEBUG
 )
 
-set(TRACY_ENABLE OFF)
+set(TRACY_ENABLE ON)
 set(TRACY_ON_DEMAND ON)
 
 set(TRACY_ONLY_LOCALHOST OFF)
