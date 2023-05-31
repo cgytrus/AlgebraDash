@@ -6,6 +6,7 @@ project(AlgebraDash VERSION 0.0.3)
 
 add_library(${PROJECT_NAME} SHARED
   src/main.cpp
+  src/features/improvements/particles.cpp
   src/features/optimizations/loading.cpp
   src/features/optimizations/rendering.cpp
   src/profiler/profiler.cpp
