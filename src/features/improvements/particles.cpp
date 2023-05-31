@@ -17,7 +17,7 @@ class $modify(CCParticleSystem) {
     // i'm too lazy to make a formula out of this
     // so instead i'm just gonna simulate the amount of times initParticle will be called h
     // (this is basically a decomp of the first half of CCParticleSystem::update)
-    __declspec(noinline) size_t nextParticlesCount(float dt) {
+    size_t nextParticlesCount(float dt) {
         if(!m_bIsActive || m_fEmissionRate == 0.f)
             return 0;
 
