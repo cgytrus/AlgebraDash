@@ -6,9 +6,10 @@ project(AlgebraDash VERSION 0.0.3)
 
 add_library(${PROJECT_NAME} SHARED
   src/main.cpp
-  src/features/improvements/particles.cpp
-  src/features/optimizations/loading.cpp
-  src/features/optimizations/rendering.cpp
+  src/features/improvements/smooth_particles.cpp
+  src/features/optimizations/loading/threading.cpp
+  src/features/optimizations/rendering/fast_batch_sort.cpp
+  src/features/optimizations/rendering/threading.cpp
   src/profiler/profiler.cpp
 )
 
@@ -28,11 +29,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 target_link_libraries(${PROJECT_NAME} geode-sdk)
-
-target_compile_definitions(${PROJECT_NAME} PRIVATE
-  OPTIMIZATIONS
-#  CUSTOM_DEBUG
-)
 
 set(TRACY_ENABLE ON)
 set(TRACY_ON_DEMAND ON)
