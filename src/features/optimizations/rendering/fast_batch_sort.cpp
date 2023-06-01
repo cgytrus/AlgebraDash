@@ -10,7 +10,7 @@ struct geode::modifier::ModifyDerive<meWhen, meWhen> {
         self->updateAtlasIndex(sprite, curIndex);
     }
 };
-class $modify(CCSpriteBatchNode) {
+struct FastSpriteBatchNodeSort : geode::Modify<FastSpriteBatchNodeSort, CCSpriteBatchNode> {
     void CCSpriteBatchNode_sortAllChildren(CCSpriteBatchNode* self) {
         ZoneScoped;
 

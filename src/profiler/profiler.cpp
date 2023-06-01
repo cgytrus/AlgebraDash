@@ -5,7 +5,7 @@
 using namespace geode::prelude;
 #include <Geode/Modify.hpp>
 
-class $modify(CCEGLView) {
+struct MarkFrame : geode::Modify<MarkFrame, CCEGLView> {
     void swapBuffers() {
         ZoneScopedN("CCEGLView::swapBuffers");
         CCEGLView::swapBuffers();

@@ -7,7 +7,7 @@ using namespace geode::prelude;
 
 static constexpr float tooFast = 50.f;
 
-class $modify(CCParticleSystem) {
+struct SmoothParticleSystem : geode::Modify<SmoothParticleSystem, CCParticleSystem> {
     bool m_firstTime = true;
     CCPoint m_prevPosition{0.f, 0.f};
     size_t m_newCount = 0;

@@ -5,7 +5,7 @@ using namespace geode::prelude;
 
 #include <shared_pool.hpp>
 
-class $modify(CCSpriteBatchNode) {
+struct ThreadedSpriteBatchNode : geode::Modify<ThreadedSpriteBatchNode, CCSpriteBatchNode> {
     void draw() {
         ZoneScoped;
 
