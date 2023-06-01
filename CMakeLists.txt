@@ -7,6 +7,7 @@ project(AlgebraDash VERSION 0.0.3)
 add_library(${PROJECT_NAME} SHARED
   src/main.cpp
   src/features/improvements/smooth_particles.cpp
+  src/features/optimizations/loading/qoi_cache.cpp
   src/features/optimizations/loading/threading.cpp
   src/features/optimizations/rendering/fast_batch_sort.cpp
   src/features/optimizations/rendering/threading.cpp
@@ -26,6 +27,7 @@ setup_geode_mod(${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME} PRIVATE
   include
   libraries/thread-pool/include
+  libraries/qoi
 )
 
 target_link_libraries(${PROJECT_NAME} geode-sdk)
