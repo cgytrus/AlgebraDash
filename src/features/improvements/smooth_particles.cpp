@@ -18,6 +18,8 @@ class $modify(CCParticleSystem) {
     // so instead i'm just gonna simulate the amount of times initParticle will be called h
     // (this is basically a decomp of the first half of CCParticleSystem::update)
     size_t nextParticlesCount(float dt) {
+        ZoneScoped;
+
         if(!m_bIsActive || m_fEmissionRate == 0.f)
             return 0;
 
@@ -52,6 +54,8 @@ class $modify(CCParticleSystem) {
     }
 
     void update(float dt) {
+        ZoneScoped;
+
         m_fields->m_newCount = 0;
 
         CCPoint curr = getPosition();
@@ -84,6 +88,8 @@ class $modify(CCParticleSystem) {
     }
 
     void initParticle(tCCParticle* particle) {
+        ZoneScoped;
+
         CCParticleSystem::initParticle(particle);
 
         if(m_fields->m_newCount == 0)
@@ -107,10 +113,14 @@ class $modify(CCParticleSystem) {
     }
 
     void resetSystem() {
+        ZoneScoped;
+
         m_fields->m_firstTime = true;
         CCParticleSystem::resetSystem();
     }
     void resumeSystem() {
+        ZoneScoped;
+
         m_fields->m_firstTime = true;
         CCParticleSystem::resumeSystem();
     }
