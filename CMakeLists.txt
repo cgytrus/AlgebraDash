@@ -33,13 +33,13 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 target_link_libraries(${PROJECT_NAME} geode-sdk)
 
-set(TRACY_ENABLE ON)
-set(TRACY_ON_DEMAND ON)
+set(TRACY_ENABLE ON CACHE BOOL "" FORCE)
+set(TRACY_ON_DEMAND ON CACHE BOOL "" FORCE)
 
-set(TRACY_ONLY_LOCALHOST OFF)
+set(TRACY_ONLY_LOCALHOST OFF CACHE BOOL "" FORCE)
 
-set(TRACY_NO_CALLSTACK OFF)
-set(TRACY_CALLSTACK OFF)
+set(TRACY_NO_CALLSTACK OFF CACHE BOOL "" FORCE)
+set(TRACY_CALLSTACK OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(libraries/tracy)
 target_include_directories(${PROJECT_NAME} PRIVATE libraries/tracy/public/tracy)
