@@ -1,5 +1,6 @@
-#include <includes.hpp>
-
+#include <Tracy.hpp>
+#include <Geode/Geode.hpp>
+using namespace geode::prelude;
 #include <Geode/modify/CCParticleSystem.hpp>
 
 // ported from https://github.com/cgytrus/SmoothParticles

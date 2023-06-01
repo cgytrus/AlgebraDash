@@ -1,14 +1,10 @@
-#include <includes.hpp>
-
+#include <Tracy.hpp>
+#include <Geode/Geode.hpp>
+using namespace geode::prelude;
 #include <Geode/modify/CCSpriteBatchNode.hpp>
 
-class meWhen;
-template<>
-struct geode::modifier::ModifyDerive<meWhen, meWhen> {
-    static void updateAtlasIndex(CCSpriteBatchNode* self, CCSprite* sprite, int* curIndex) {
-        self->updateAtlasIndex(sprite, curIndex);
-    }
-};
+#include <shared_pool.hpp>
+
 class $modify(CCSpriteBatchNode) {
     void draw() {
         ZoneScoped;

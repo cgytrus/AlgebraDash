@@ -1,7 +1,10 @@
-#include <includes.hpp>
-#include <mutex>
-
+#include <Tracy.hpp>
+#include <Geode/Geode.hpp>
+using namespace geode::prelude;
 #include <Geode/modify/LoadingLayer.hpp>
+
+#include <shared_pool.hpp>
+#include <mutex>
 
 const CCTexture2DPixelFormat kCCTexture2DPixelFormat_DontChange = (CCTexture2DPixelFormat)-1;
 

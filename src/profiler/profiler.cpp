@@ -1,6 +1,8 @@
 #ifdef TRACY_ENABLE
 
-#include <includes.hpp>
+#include <Tracy.hpp>
+#include <Geode/Geode.hpp>
+using namespace geode::prelude;
 #include <Geode/Modify.hpp>
 
 class $modify(CCEGLView) {

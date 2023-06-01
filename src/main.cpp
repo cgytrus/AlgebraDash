@@ -1,4 +1,7 @@
-#include <includes.hpp>
+#include <Geode/Geode.hpp>
+using namespace geode::prelude;
+
+#include <shared_pool.hpp>
 
 static BS::thread_pool* _sharedPool;
 BS::thread_pool* sharedPool() { return _sharedPool; }
