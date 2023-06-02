@@ -5,14 +5,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(AlgebraDash VERSION 0.0.3)
 
 add_library(${PROJECT_NAME} SHARED
-  src/main.cpp
+  src/shared_pool.cpp
+  src/debug/profiler.cpp
   src/features/improvements/force_rgba8888.cpp
   src/features/improvements/smooth_particles.cpp
   src/features/optimizations/loading/qoi_cache.cpp
   src/features/optimizations/loading/threading.cpp
   src/features/optimizations/rendering/fast_batch_sort.cpp
   src/features/optimizations/rendering/threading.cpp
-  src/profiler/profiler.cpp
 )
 
 if (NOT DEFINED ENV{GEODE_SDK})
@@ -33,7 +33,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 target_link_libraries(${PROJECT_NAME} geode-sdk)
 
-set(TRACY_ENABLE ON CACHE BOOL "" FORCE)
+set(TRACY_ENABLE OFF CACHE BOOL "" FORCE)
 set(TRACY_ON_DEMAND ON CACHE BOOL "" FORCE)
 
 set(TRACY_ONLY_LOCALHOST OFF CACHE BOOL "" FORCE)

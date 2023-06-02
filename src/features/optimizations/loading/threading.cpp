@@ -62,7 +62,7 @@ public:
         else if(std::string::npos != lowerCase.find(".webp"))
             eImageFormat = CCImage::kFmtWebp;
 
-        sharedPool()->push_task([this, fullpath, eImageFormat, pathKey, plistPath, pixelFormat] {
+        sharedPool().push_task([this, fullpath, eImageFormat, pathKey, plistPath, pixelFormat] {
             ZoneScopedN("init image job");
 
             auto pImage = new CCImage();
@@ -195,7 +195,7 @@ struct ThreadedLoadingLayer : geode::Modify<ThreadedLoadingLayer, LoadingLayer> 
             textureCache->addFont("bigFont.fnt");
         }
 
-        m_fields->m_maxProgress = sharedPool()->get_tasks_total();
+        m_fields->m_maxProgress = sharedPool().get_tasks_total();
 
         // 9
         {
@@ -247,7 +247,7 @@ struct ThreadedLoadingLayer : geode::Modify<ThreadedLoadingLayer, LoadingLayer> 
     void updateProgressBar() {
         ZoneScoped;
         auto sliderX = m_sliderGrooveXPos;
-        float progress = (1.f - (float)sharedPool()->get_tasks_total() / m_fields->m_maxProgress) * sliderX;
+        float progress = (1.f - (float)sharedPool().get_tasks_total() / m_fields->m_maxProgress) * sliderX;
         if(progress <= sliderX)
             sliderX = progress;
         m_sliderBar->setTextureRect({ 0.f, 0.f, sliderX, m_sliderGrooveHeight });
@@ -263,7 +263,7 @@ struct ThreadedLoadingLayer : geode::Modify<ThreadedLoadingLayer, LoadingLayer> 
 
         reinterpret_cast<CustomCCTextureCache*>(CCTextureCache::sharedTextureCache())->finishAddImage();
 
-        if(sharedPool()->get_tasks_total() > 0) {
+        if(sharedPool().get_tasks_total() > 0) {
             ZoneScopedN("wait");
             LoadingLayer::loadAssets();
             updateProgressBar();

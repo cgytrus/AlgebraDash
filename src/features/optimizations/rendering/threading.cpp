@@ -18,11 +18,10 @@ struct ThreadedSpriteBatchNode : geode::Modify<ThreadedSpriteBatchNode, CCSprite
         shader->setUniformsForBuiltins();
 
         if(getChildrenCount() > 0) {
-            auto threadPool = sharedPool();
             CCArray* children = getChildren();
             CCObject** objects = children->data->arr;
             BS::multi_future<void> updateTransformsJob =
-                threadPool->parallelize_loop(0, children->data->num, [objects](unsigned int a, unsigned int b) {
+                sharedPool().parallelize_loop(0, children->data->num, [objects](unsigned int a, unsigned int b) {
                     ZoneScopedN("update transforms job");
                     for(unsigned int i = a; i < b; ++i) {
                         CCSprite* sprite = (CCSprite*)objects[i];
