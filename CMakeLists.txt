@@ -28,12 +28,11 @@ setup_geode_mod(${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
   include
-  libraries/glew/include
   libraries/thread-pool/include
   libraries/qoi
 )
 
-target_link_libraries(${PROJECT_NAME} geode-sdk opengl32 ${CMAKE_SOURCE_DIR}/libraries/glew/lib/glew32.lib)
+target_link_libraries(${PROJECT_NAME} geode-sdk opengl32)
 
 set(TRACY_ENABLE OFF CACHE BOOL "" FORCE)
 set(TRACY_ON_DEMAND ON CACHE BOOL "" FORCE)
