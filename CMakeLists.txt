@@ -12,6 +12,7 @@ add_library(${PROJECT_NAME} SHARED
   src/features/optimizations/loading/qoi_cache.cpp
   src/features/optimizations/loading/threading.cpp
   src/features/optimizations/rendering/fast_batch_sort.cpp
+  src/features/optimizations/rendering/opengl_update.cpp
   src/features/optimizations/rendering/threading.cpp
 )
 
@@ -27,11 +28,12 @@ setup_geode_mod(${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
   include
+  libraries/glew/include
   libraries/thread-pool/include
   libraries/qoi
 )
 
-target_link_libraries(${PROJECT_NAME} geode-sdk)
+target_link_libraries(${PROJECT_NAME} geode-sdk opengl32 ${CMAKE_SOURCE_DIR}/libraries/glew/lib/glew32.lib)
 
 set(TRACY_ENABLE OFF CACHE BOOL "" FORCE)
 set(TRACY_ON_DEMAND ON CACHE BOOL "" FORCE)
