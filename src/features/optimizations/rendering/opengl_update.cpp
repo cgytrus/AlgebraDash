@@ -1,5 +1,6 @@
 //#include <GL/glew.h>
 #include <Tracy.hpp>
+#include <TracyOpenGL.hpp>
 #include <Geode/Geode.hpp>
 using namespace geode::prelude;
 #include <glew_add.h>
@@ -72,7 +73,7 @@ struct CustomCCEGLView : geode::Modify<CustomCCEGLView, CCEGLView> {
         CCEGLView::setupWindow(rect);
     }
 
-    GEODE_NOINLINE bool initGlew() {
+    bool initGlew() {
         log::debug("initializing glew");
         glewExperimental = GL_TRUE;
         if(!CCEGLView::initGlew())
@@ -230,10 +231,13 @@ void vaoDrawCircle(const CCPoint& center, float radius, float angle, unsigned in
     data0->s_pShader->setUniformsForBuiltins();
     data0->s_pShader->setUniformLocationWith4fv(data1->s_nColorLocation, (GLfloat*)&data1->s_tColor.r, 1);
 
+    TracyGpuZone("ccDrawCircle");
     ccDrawCircleObj.updateData(sizeof(ccDrawCicleVertices[0]) * 2 * (segments + 2), ccDrawCicleVertices);
     glBindVertexArray(ccDrawCircleObj.vao);
     glDrawArrays(GL_LINE_STRIP, 0, (GLsizei)segments + 1 + drawLineToCenter);
     glBindVertexArray(0);
+
+    CC_INCREMENT_GL_DRAWS(1);
 }
 void vaoDrawFilledCircle(const CCPoint& center, float radius, float angle, unsigned int segments) {
     ZoneScoped;
@@ -264,10 +268,13 @@ void vaoDrawFilledCircle(const CCPoint& center, float radius, float angle, unsig
     data0->s_pShader->setUniformsForBuiltins();
     data0->s_pShader->setUniformLocationWith4fv(data1->s_nColorLocation, (GLfloat*)&data1->s_tColor.r, 1);
 
+    TracyGpuZone("ccDrawFilledCircle");
     ccDrawCircleObj.updateData(sizeof(ccDrawCicleVertices[0]) * 2 * (segments + 2), ccDrawCicleVertices);
     glBindVertexArray(ccDrawCircleObj.vao);
     glDrawArrays(GL_TRIANGLE_FAN, 0, (GLsizei)segments + 1);
     glBindVertexArray(0);
+
+    CC_INCREMENT_GL_DRAWS(1);
 }
 
 void vaoDrawLine(const CCPoint& origin, const CCPoint& destination) {
@@ -281,10 +288,13 @@ void vaoDrawLine(const CCPoint& origin, const CCPoint& destination) {
     ccDrawLineVertices[0] = {origin.x, origin.y};
     ccDrawLineVertices[1] = {destination.x, destination.y};
 
+    TracyGpuZone("ccDrawLine");
     ccDrawLineObj.updateData();
     glBindVertexArray(ccDrawLineObj.vao);
     glDrawArrays(GL_LINES, 0, 2);
     glBindVertexArray(0);
+
+    CC_INCREMENT_GL_DRAWS(1);
 }
 void vaoDrawLines(const CCPoint* lines, unsigned int numberOfLines) {
     ZoneScoped;
@@ -298,10 +308,13 @@ void vaoDrawLines(const CCPoint* lines, unsigned int numberOfLines) {
     data0->s_pShader->setUniformLocationWith4fv(data1->s_nColorLocation, (GLfloat*)&data1->s_tColor.r, 1);
     data0->s_pShader->setUniformLocationWith1f(data1->s_nPointSizeLocation, data1->s_fPointSize);
 
+    TracyGpuZone("ccDrawLines");
     ccDrawLinesObj.updateData(sizeof(ccVertex2F) * numberOfLines, lines);
     glBindVertexArray(ccDrawLinesObj.vao);
     glDrawArrays(GL_LINES, 0, numberOfLines);
     glBindVertexArray(0);
+
+    CC_INCREMENT_GL_DRAWS(1);
 }
 
 void vaoDrawPoly(const CCPoint* vertices, unsigned int numOfVertices, bool closePolygon) {
@@ -315,10 +328,13 @@ void vaoDrawPoly(const CCPoint* vertices, unsigned int numOfVertices, bool close
     data0->s_pShader->setUniformsForBuiltins();
     data0->s_pShader->setUniformLocationWith4fv(data1->s_nColorLocation, (GLfloat*)&data1->s_tColor.r, 1);
 
+    TracyGpuZone("ccDrawPoly");
     ccDrawPolyObj.updateData(sizeof(ccVertex2F) * numOfVertices, vertices);
     glBindVertexArray(ccDrawPolyObj.vao);
     glDrawArrays(closePolygon ? GL_LINE_LOOP : GL_LINE_STRIP, 0, numOfVertices);
     glBindVertexArray(0);
+
+    CC_INCREMENT_GL_DRAWS(1);
 }
 void vaoDrawSolidPoly(const CCPoint* poli, unsigned int numberOfPoints, ccColor4F color) {
     ZoneScoped;
@@ -331,10 +347,13 @@ void vaoDrawSolidPoly(const CCPoint* poli, unsigned int numberOfPoints, ccColor4
     data0->s_pShader->setUniformsForBuiltins();
     data0->s_pShader->setUniformLocationWith4fv(data1->s_nColorLocation, (GLfloat*)&color.r, 1);
 
+    TracyGpuZone("ccDrawSolidPoly");
     ccDrawPolyObj.updateData(sizeof(ccVertex2F) * numberOfPoints, poli);
     glBindVertexArray(ccDrawPolyObj.vao);
     glDrawArrays(GL_TRIANGLE_FAN, 0, numberOfPoints);
     glBindVertexArray(0);
+
+    CC_INCREMENT_GL_DRAWS(1);
 }
 
 $execute {
@@ -390,10 +409,12 @@ class $modify(CCSprite) {
     GLuint m_vbo;
 
     void draw() {
+        ZoneScoped;
+
         if(m_bDontDraw || _realOpacity == 0)
             return;
 
-        ZoneScoped;
+        TracyGpuZone("CCSprite::draw");
 
         if(m_fields->m_vao == 0) {
             glGenVertexArrays(1, &m_fields->m_vao);
@@ -429,6 +450,8 @@ class $modify(CCSprite) {
         glBindVertexArray(m_fields->m_vao);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glBindVertexArray(0);
+
+        CC_INCREMENT_GL_DRAWS(1);
     }
 
     void destructor() {
@@ -481,6 +504,8 @@ class $modify(CCTextureAtlas) {
         if(n == 0)
             return;
 
+        TracyGpuZone("CCTextureAtlas::drawNumberOfQuads");
+
         ccGLBindTexture2D(m_pTexture->getName());
 
         if(m_bDirty) {
@@ -504,6 +529,8 @@ class $modify(CCTextureAtlas) {
         glBindVertexArray(textureAtlasVaos[this]);
         glDrawElements(GL_TRIANGLES, (GLsizei)n * 6, GL_UNSIGNED_SHORT, (GLvoid*)(start * 6 * sizeof(m_pIndices[0])));
         glBindVertexArray(0);
+
+        CC_INCREMENT_GL_DRAWS(1);
     }
 
     void destructor() {
@@ -565,6 +592,8 @@ class $modify(CCParticleSystemQuad) {
         if(!m_pTexture || m_uParticleIdx <= 0)
             return;
 
+        TracyGpuZone("CCParticleSystemQuad::draw");
+
         CC_NODE_DRAW_SETUP();
 
         ccGLBindTexture2D(m_pTexture->getName());
@@ -573,6 +602,8 @@ class $modify(CCParticleSystemQuad) {
         glBindVertexArray(m_fields->m_vao);
         glDrawElements(GL_TRIANGLES, (GLsizei)m_uParticleIdx * 6, GL_UNSIGNED_SHORT, 0);
         glBindVertexArray(0);
+
+        CC_INCREMENT_GL_DRAWS(1);
     }
 
     void destructor() {
@@ -630,6 +661,8 @@ class $modify(CCMotionStreak) {
         if(m_uNuPoints <= 1)
             return;
 
+        TracyGpuZone("CCMotionStreak::draw");
+
         // TODO: only upload when changed
         glBindBuffer(GL_ARRAY_BUFFER, m_fields->m_vbo);
         glBufferSubData(GL_ARRAY_BUFFER, 0, vertSize(), m_pVertices);
@@ -645,6 +678,8 @@ class $modify(CCMotionStreak) {
         glBindVertexArray(m_fields->m_vao);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, (GLsizei)m_uNuPoints * 2);
         glBindVertexArray(0);
+
+        CC_INCREMENT_GL_DRAWS(1);
     }
 
     void destructor() {
@@ -673,6 +708,7 @@ class $modify(CCDrawNode) {
         // for some reason vanilla doesnt have a check for this
         if(m_nBufferCount <= 0)
             return;
+        TracyGpuZone("CCDrawNode::draw");
         glBindVertexArray(m_uVao);
         CCDrawNode::draw();
         glBindVertexArray(0);
@@ -738,6 +774,7 @@ class $modify(CCLayerColor) {
 
     void draw() {
         ZoneScoped;
+        TracyGpuZone("CCLayerColor::draw");
 
         glBindBuffer(GL_ARRAY_BUFFER, m_fields->m_vbo);
         glBufferSubData(GL_ARRAY_BUFFER, vertSize(), colSize(), m_pSquareColors);
@@ -750,6 +787,8 @@ class $modify(CCLayerColor) {
         glBindVertexArray(m_fields->m_vao);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glBindVertexArray(0);
+
+        CC_INCREMENT_GL_DRAWS(1);
     }
 
     void destructor() {

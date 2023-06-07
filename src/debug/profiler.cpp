@@ -1,14 +1,24 @@
 #ifdef TRACY_ENABLE
 
 #include <Tracy.hpp>
+#include <TracyOpenGL.hpp>
 #include <Geode/Geode.hpp>
 using namespace geode::prelude;
 #include <Geode/Modify.hpp>
 
 struct MarkFrame : geode::Modify<MarkFrame, CCEGLView> {
+    bool initGlew() {
+        ZoneScopedN("CCEGLView::initGlew");
+        if(!CCEGLView::initGlew())
+            return false;
+        TracyGpuContext;
+        return true;
+    }
+
     void swapBuffers() {
         ZoneScopedN("CCEGLView::swapBuffers");
         CCEGLView::swapBuffers();
+        TracyGpuCollect;
         FrameMark;
     }
 };
