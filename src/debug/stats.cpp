@@ -77,6 +77,9 @@ struct StatsCCDirector : geode::Modify<StatsCCDirector, CCDirector> {
         m_pDrawsLabel->setPosition(ccpAdd(ccp(0, 17 * factor), getVisibleOrigin()));
         m_pFPSLabel->setPosition(getVisibleOrigin());
 
+        log::debug("enabling stats");
+        m_bDisplayStats = true;
+
         TracyPlotConfig("Draw Calls", tracy::PlotFormatType::Number, true, true, 0);
     }
 
@@ -101,8 +104,6 @@ struct StatsCCDirector : geode::Modify<StatsCCDirector, CCDirector> {
 struct StatsCCEGLViewProtocol : geode::Modify<StatsCCEGLViewProtocol, CCEGLViewProtocol> {
     void setDesignResolutionSize(float width, float height, ResolutionPolicy resolutionPolicy) {
         CCEGLViewProtocol::setDesignResolutionSize(width, height, resolutionPolicy);
-        log::debug("enabling stats");
         reinterpret_cast<StatsCCDirector*>(CCDirector::sharedDirector())->createStatsLabel();
-        CCDirector::sharedDirector()->setDisplayStats(true);
     }
 };
