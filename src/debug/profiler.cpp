@@ -23,6 +23,58 @@ struct MarkFrame : geode::Modify<MarkFrame, CCEGLView> {
     }
 };
 
+void memoryAllocated(void* memory, size_t size) {
+    TracyAlloc(memory, size);
+}
+void memoryFreed(void* memory) {
+    TracyFree(memory);
+}
+void* __cdecl operatorNewHook(size_t size) {
+    auto ret = operator new(size);
+    memoryAllocated(ret, size);
+    return ret;
+}
+void __cdecl operatorDeleteHook(void* memory) {
+    memoryFreed(memory);
+    operator delete(memory);
+}
+void __cdecl operatorDeleteArrayHook(void* memory) {
+    memoryFreed(memory);
+    operator delete[](memory);
+}
+void* __cdecl mallocHook(size_t size) {
+    auto ret = malloc(size);
+    memoryAllocated(ret, size);
+    return ret;
+}
+void* __cdecl callocHook(size_t count, size_t size) {
+    auto ret = calloc(count, size);
+    memoryAllocated(ret, size * count);
+    return ret;
+}
+void __cdecl freeHook(void* memory) {
+    memoryFreed(memory);
+    free(memory);
+}
+void* __cdecl reallocHook(void* memory, size_t newSize) {
+    memoryFreed(memory);
+    auto ret = realloc(memory, newSize);
+    memoryAllocated(ret, newSize);
+    return ret;
+}
+$execute {
+    bool success = true;
+
+    auto h = GetModuleHandle("msvcr120.dll");
+    success = success && Mod::get()->addHook(reinterpret_cast<void*>(GetProcAddress(h, "realloc")), &reallocHook, "realloc", tulip::hook::TulipConvention::Cdecl).isOk();
+    success = success && Mod::get()->addHook(reinterpret_cast<void*>(GetProcAddress(h, "calloc")), &callocHook, "calloc", tulip::hook::TulipConvention::Cdecl).isOk();
+    success = success && Mod::get()->addHook(reinterpret_cast<void*>(GetProcAddress(h, "malloc")), &mallocHook, "malloc", tulip::hook::TulipConvention::Cdecl).isOk();
+    success = success && Mod::get()->addHook(reinterpret_cast<void*>(GetProcAddress(h, "free")), &freeHook, "free", tulip::hook::TulipConvention::Cdecl).isOk();
+
+    if(!success)
+        log::error("failed to hook some memory stuff");
+}
+
 #define PROFILER_HOOK_3(Ret_, Class_, Name_) class GEODE_CRTP2(GEODE_CONCAT(profilerHook, __LINE__), Class_) { \
     Ret_ Name_() { ZoneScopedN(#Class_ "::" #Name_); return Class_::Name_(); } };
 #define PROFILER_HOOK_4(Ret_, Class_, Name_, A_) class GEODE_CRTP2(GEODE_CONCAT(profilerHook, __LINE__), Class_) { \
