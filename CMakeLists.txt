@@ -8,6 +8,7 @@ add_library(${PROJECT_NAME} SHARED
   src/shared_pool.cpp
   src/debug/profiler.cpp
   src/debug/stats.cpp
+  src/features/improvements/antialiasing.cpp
   src/features/improvements/force_rgba8888.cpp
   src/features/improvements/smooth_particles.cpp
   src/features/optimizations/loading/qoi_cache.cpp
