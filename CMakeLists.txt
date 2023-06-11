@@ -37,7 +37,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 target_link_libraries(${PROJECT_NAME} geode-sdk opengl32)
 
-set(TRACY_ENABLE ON CACHE BOOL "" FORCE)
+set(TRACY_ENABLE OFF CACHE BOOL "" FORCE)
 set(TRACY_ON_DEMAND ON CACHE BOOL "" FORCE)
 
 set(TRACY_ONLY_LOCALHOST OFF CACHE BOOL "" FORCE)
