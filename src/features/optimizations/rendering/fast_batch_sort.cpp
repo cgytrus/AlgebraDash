@@ -3,6 +3,8 @@
 using namespace geode::prelude;
 #include <Geode/modify/CCSpriteBatchNode.hpp>
 
+// TODO: mac address for CCSpriteBatchNode::updateAtlasIndex
+#ifdef GEODE_IS_WINDOWS
 class meWhen;
 template<>
 struct geode::modifier::ModifyDerive<meWhen, meWhen> {
@@ -95,3 +97,4 @@ struct FastSpriteBatchNodeSort : geode::Modify<FastSpriteBatchNodeSort, CCSprite
         //self.setEnabled(true);
     }
 };
+#endif

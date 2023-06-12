@@ -89,12 +89,15 @@ struct StatsCCDirector : geode::Modify<StatsCCDirector, CCDirector> {
         if(!same)
             createStatsLabel();
     }
+// TODO: mac address for CCDirector::setContentScaleFactor
+#ifdef GEODE_IS_WINDOWS
     void setContentScaleFactor(float f) {
         bool same = m_fContentScaleFactor == f;
         CCDirector::setContentScaleFactor(f);
         if(!same)
             createStatsLabel();
     }
+#endif
 
     void showStats() {
         TracyPlot("Draw Calls", static_cast<int64_t>(g_uNumberOfDraws));

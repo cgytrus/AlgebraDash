@@ -10,6 +10,8 @@ using namespace geode::prelude;
 
 const CCImage::EImageFormat kFmtQoi = (CCImage::EImageFormat)69;
 
+// TODO: mac addresses for initWithImageFile and initWithImageFileThreadSafe
+#ifdef GEODE_IS_WINDOWS
 struct QoiCachedImage : geode::Modify<QoiCachedImage, CCImage> {
     void cacheImage(ghc::filesystem::file_time_type qoiWriteTime, ghc::filesystem::path qoiPath) {
         ZoneScoped;
@@ -111,3 +113,4 @@ struct QoiCachedImage : geode::Modify<QoiCachedImage, CCImage> {
             CCImage::initWithImageData(pData, nDataLen, eFmt, nWidth, nHeight, nBitsPerComponent);
     }
 };
+#endif

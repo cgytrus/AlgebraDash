@@ -5,6 +5,9 @@
 using namespace geode::prelude;
 #include <glew_add.h>
 
+// TODO: a lot of addresses but is this even needed on mac?
+#ifdef GEODE_IS_WINDOWS
+
 #include <Geode/modify/CCEGLView.hpp>
 
 // sorry 500000000 year old hardware users 😢
@@ -863,3 +866,5 @@ class $modify(CCLayerColor) {
         CCLayerColor::~CCLayerColor();
     }
 };
+
+#endif

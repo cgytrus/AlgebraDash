@@ -8,6 +8,8 @@ using namespace geode::prelude;
 
 const CCTexture2DPixelFormat kCCTexture2DPixelFormat_DontChange = (CCTexture2DPixelFormat)-1;
 
+// TODO: mac addresses for CCImage::initWithImageFileThreadSafe
+#ifdef GEODE_IS_WINDOWS
 struct LoadedImage {
     CCImage* image;
     const char* plistPath;
@@ -286,3 +288,4 @@ struct ThreadedLoadingLayer : geode::Modify<ThreadedLoadingLayer, LoadingLayer> 
         //self.setEnabled(true);
     }
 };
+#endif

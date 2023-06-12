@@ -26,6 +26,15 @@ jobs:
           cli_setup: ''
           cli_name: 'geode.exe'
 
+        - name: "macOS"
+          bin_folder: "macos"
+          os: macos-latest
+          extra_flags: "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.13"
+          out_paths: './build/*.dylib'
+          platform_suffix: 'mac'
+          cli_setup: 'chmod a+rwx ./geode'
+          cli_name: 'geode'
+
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
 
@@ -107,6 +116,10 @@ jobs:
         with:
           name: build-windows
 
+      - uses: actions/download-artifact@v3
+        with:
+          name: build-macos
+
       - name: Display structure of downloaded files
         run: ls -R
 
@@ -123,4 +136,9 @@ jobs:
       - uses: geekyeggo/delete-artifact@v2
         with:
             name: build-windows
+            failOnError: false
+
+      - uses: geekyeggo/delete-artifact@v2
+        with:
+            name: build-macos
             failOnError: false

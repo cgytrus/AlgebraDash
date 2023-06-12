@@ -2,6 +2,8 @@
 using namespace geode::prelude;
 #include <Geode/modify/CCEGLView.hpp>
 
+// TODO: mac address for setupWindow
+#ifdef GEODE_IS_WINDOWS
 struct Antialiasing : geode::Modify<Antialiasing, CCEGLView> {
     void setupWindow(CCRect rect) {
         auto _glfwWindowHint = reinterpret_cast<void(*)(int, int)>(base::getCocos() + 0x1116f0);
@@ -10,3 +12,4 @@ struct Antialiasing : geode::Modify<Antialiasing, CCEGLView> {
         CCEGLView::setupWindow(rect);
     }
 };
+#endif

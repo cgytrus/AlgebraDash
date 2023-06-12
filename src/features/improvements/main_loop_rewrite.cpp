@@ -3,6 +3,8 @@
 using namespace geode::prelude;
 #include <Geode/modify/CCApplication.hpp>
 
+#ifdef GEODE_IS_WINDOWS
+
 void(__cdecl* PVRFrameEnableControlWindow)(bool);
 void(__thiscall* updateConnected)(CCControllerHandler*);
 $execute {
@@ -88,3 +90,9 @@ struct MainLoopRewrite : geode::Modify<MainLoopRewrite, CCApplication> {
         }
     }
 };
+
+#elif defined GEODE_IS_MACOS
+
+// TODO: mac version
+
+#endif
