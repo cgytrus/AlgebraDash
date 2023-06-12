@@ -13,13 +13,13 @@ struct geode::modifier::ModifyDerive<meWhen, meWhen> {
     }
 };
 struct FastSpriteBatchNodeSort : geode::Modify<FastSpriteBatchNodeSort, CCSpriteBatchNode> {
-    void CCSpriteBatchNode_sortAllChildren(CCSpriteBatchNode* self) {
+    void sortAllChildren() {
         ZoneScoped;
 
         if(!m_bReorderChildDirty || m_bManualSortChildren && !m_bManualSortAllChildrenDirty)
             return;
 
-        CCArray* children = self->getChildren();
+        CCArray* children = getChildren();
         CCNode** arr = (CCNode**)children->data->arr;
 
         if(children->count() == 0)
