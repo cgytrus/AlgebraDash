@@ -92,8 +92,6 @@ struct CustomCCEGLView : geode::Modify<CustomCCEGLView, CCEGLView> {
             glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
         }
 
-        vaoDrawPrepare();
-
         return true;
     }
 };
@@ -124,6 +122,7 @@ struct ccDrawData1_t {
 };
 static ccDrawData0_t* data0;
 static ccDrawData1_t* data1;
+void(__cdecl* lazy_init)();
 
 struct ccDrawVaoVbo_t {
     GLuint vao = 0;
@@ -165,6 +164,11 @@ public:
         glUnmapBuffer(GL_ARRAY_BUFFER);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
+
+    void cleanup() {
+        glDeleteVertexArrays(1, &vao);
+        glDeleteBuffers(1, &vbo);
+    }
 };
 
 static int ccDrawCircleLastSegments = 0;
@@ -177,32 +181,50 @@ static ccDrawVaoVbo_t ccDrawLinesObj{0, nullptr};
 
 static ccDrawVaoVbo_t ccDrawPolyObj{0, nullptr};
 
-void vaoDrawPrepare() {
+void vaoDrawInit_() {
     ZoneScoped;
 
-    // setup
-    data0 = reinterpret_cast<ccDrawData0_t*>(base::getCocos() + 0x19d8f8);
-    data1 = reinterpret_cast<ccDrawData1_t*>(base::getCocos() + 0x198b34);
+    if(!data0->s_bInitialized) {
+        // TODO: use other opengl shenanigans for optimization
 
-    // TODO: use other opengl shenanigans for optimization
+        ccDrawCircleObj.setup();
+        ccDrawLineObj.setup();
+        ccDrawLinesObj.setup();
+        ccDrawPolyObj.setup();
 
-    // circle/filled circle
-    ccDrawCircleObj.setup();
+        glBindVertexArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+}
+void vaoDrawInit() {
+    ZoneScoped;
+    vaoDrawInit_();
+    ccDrawInit();
+}
+void vaoLazyInit() {
+    ZoneScoped;
+    vaoDrawInit_();
+    lazy_init();
+}
+void vaoDrawFree() {
+    ZoneScoped;
 
-    // line/lines
-    ccDrawLineObj.setup();
-    ccDrawLinesObj.setup();
+    if(data0->s_bInitialized) {
+        ccDrawCircleObj.cleanup();
+        ccDrawLineObj.cleanup();
+        ccDrawLinesObj.cleanup();
+        ccDrawPolyObj.cleanup();
 
-    // poly/solid poly
-    ccDrawPolyObj.setup();
+        glBindVertexArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
 
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    ccDrawFree();
 }
 
 void vaoDrawCircle(const CCPoint& center, float radius, float angle, unsigned int segments, bool drawLineToCenter, float scaleX, float scaleY) {
     ZoneScoped;
-    ccDrawInit();
+    lazy_init();
 
     if(radius == 0.f)
         return;
@@ -241,7 +263,7 @@ void vaoDrawCircle(const CCPoint& center, float radius, float angle, unsigned in
 }
 void vaoDrawFilledCircle(const CCPoint& center, float radius, float angle, unsigned int segments) {
     ZoneScoped;
-    ccDrawInit();
+    lazy_init();
 
     if(radius == 0.f)
         return;
@@ -279,7 +301,7 @@ void vaoDrawFilledCircle(const CCPoint& center, float radius, float angle, unsig
 
 void vaoDrawLine(const CCPoint& origin, const CCPoint& destination) {
     ZoneScoped;
-    ccDrawInit();
+    lazy_init();
 
     data0->s_pShader->use();
     data0->s_pShader->setUniformsForBuiltins();
@@ -298,7 +320,7 @@ void vaoDrawLine(const CCPoint& origin, const CCPoint& destination) {
 }
 void vaoDrawLines(const CCPoint* lines, unsigned int numberOfLines) {
     ZoneScoped;
-    ccDrawInit();
+    lazy_init();
 
     if(numberOfLines == 0)
         return;
@@ -319,7 +341,7 @@ void vaoDrawLines(const CCPoint* lines, unsigned int numberOfLines) {
 
 void vaoDrawPoly(const CCPoint* vertices, unsigned int numOfVertices, bool closePolygon) {
     ZoneScoped;
-    ccDrawInit();
+    lazy_init();
 
     if(numOfVertices == 0)
         return;
@@ -338,7 +360,7 @@ void vaoDrawPoly(const CCPoint* vertices, unsigned int numOfVertices, bool close
 }
 void vaoDrawSolidPoly(const CCPoint* poli, unsigned int numberOfPoints, ccColor4F color) {
     ZoneScoped;
-    ccDrawInit();
+    lazy_init();
 
     if(numberOfPoints == 0)
         return;
@@ -357,7 +379,29 @@ void vaoDrawSolidPoly(const CCPoint* poli, unsigned int numberOfPoints, ccColor4
 }
 
 $execute {
+    data0 = reinterpret_cast<ccDrawData0_t*>(base::getCocos() + 0x19d8f8);
+    data1 = reinterpret_cast<ccDrawData1_t*>(base::getCocos() + 0x198b34);
+    lazy_init = reinterpret_cast<void(__cdecl*)()>(base::getCocos() + 0x6b980);
+
     bool success = true;
+    success = success && Mod::get()->addHook(
+        reinterpret_cast<void*>(geode::addresser::getNonVirtual(&ccDrawInit)),
+        &vaoDrawInit,
+        "cocos2d::ccDrawInit",
+        tulip::hook::TulipConvention::Cdecl
+    ).isOk();
+    success = success && Mod::get()->addHook(
+        reinterpret_cast<void*>(geode::addresser::getNonVirtual(lazy_init)),
+        &vaoLazyInit,
+        "lazy_init",
+        tulip::hook::TulipConvention::Cdecl
+    ).isOk();
+    success = success && Mod::get()->addHook(
+        reinterpret_cast<void*>(geode::addresser::getNonVirtual(&ccDrawFree)),
+        &vaoDrawFree,
+        "cocos2d::ccDrawFree",
+        tulip::hook::TulipConvention::Cdecl
+    ).isOk();
     success = success && Mod::get()->addHook(
         reinterpret_cast<void*>(
             geode::addresser::getNonVirtual(
