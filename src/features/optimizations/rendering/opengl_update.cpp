@@ -403,10 +403,12 @@ $execute {
         log::error("failed to hook some ccDraw* stuff");
 }
 
+constexpr auto GEODE_NODE_METADATA_TAG = 0xB324ABC;
+
 #include <Geode/modify/CCSprite.hpp>
 class $modify(CCSprite) {
-    GLuint m_vao;
-    GLuint m_vbo;
+    GLuint m_vao = 0;
+    GLuint m_vbo = 0;
 
     void draw() {
         ZoneScoped;
@@ -455,8 +457,12 @@ class $modify(CCSprite) {
     }
 
     void destructor() {
-        glDeleteVertexArrays(1, &m_fields->m_vao);
-        glBindVertexArray(0);
+        if(m_pUserObject && m_pUserObject->getTag() == GEODE_NODE_METADATA_TAG) {
+            glDeleteVertexArrays(1, &m_fields->m_vao);
+            glDeleteBuffers(1, &m_fields->m_vbo);
+            glBindVertexArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+        }
         CCSprite::~CCSprite();
     }
 };
@@ -551,7 +557,10 @@ class $modify(CCParticleSystemQuad) {
     float m_xDiff;
     float m_yDiff;
 
-    GLuint m_vao;
+    GLuint m_vao = 0;
+
+    // hook constructor to force m_fields creation to prevent issues in the destructor
+    CCParticleSystemQuad* constructor() { this->CCParticleSystemQuad::CCParticleSystemQuad(); return this; }
 
     void setupVBO() {
         ZoneScoped;
@@ -607,8 +616,10 @@ class $modify(CCParticleSystemQuad) {
     }
 
     void destructor() {
-        glDeleteVertexArrays(1, &m_fields->m_vao);
-        glBindVertexArray(0);
+        if(m_pUserObject && m_pUserObject->getTag() == GEODE_NODE_METADATA_TAG) {
+            glDeleteVertexArrays(1, &m_fields->m_vao);
+            glBindVertexArray(0);
+        }
         CCParticleSystemQuad::~CCParticleSystemQuad();
     }
 };
@@ -683,8 +694,12 @@ class $modify(CCMotionStreak) {
     }
 
     void destructor() {
-        glDeleteVertexArrays(1, &m_fields->m_vao);
-        glBindVertexArray(0);
+        if(m_pUserObject && m_pUserObject->getTag() == GEODE_NODE_METADATA_TAG) {
+            glDeleteVertexArrays(1, &m_fields->m_vao);
+            glDeleteBuffers(1, &m_fields->m_vbo);
+            glBindVertexArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+        }
         CCMotionStreak::~CCMotionStreak();
     }
 };
@@ -725,6 +740,9 @@ class $modify(CCDrawNode) {
 class $modify(CCLayerColor) {
     GLuint m_vao = 0;
     GLuint m_vbo = 0;
+
+    // hook constructor to force m_fields creation to prevent issues in the destructor
+    CCLayerColor* constructor() { this->CCLayerColor::CCLayerColor(); return this; }
 
     GLsizeiptr vertSize() { return sizeof(ccVertex2F) * 4; }
     GLsizeiptr colSize() { return sizeof(ccColor4F) * 4; }
@@ -792,10 +810,12 @@ class $modify(CCLayerColor) {
     }
 
     void destructor() {
-        glDeleteVertexArrays(1, &m_fields->m_vao);
-        glDeleteBuffers(1, &m_fields->m_vbo);
-        glBindVertexArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        if(m_pUserObject && m_pUserObject->getTag() == GEODE_NODE_METADATA_TAG) {
+            glDeleteVertexArrays(1, &m_fields->m_vao);
+            glDeleteBuffers(1, &m_fields->m_vbo);
+            glBindVertexArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+        }
         CCLayerColor::~CCLayerColor();
     }
 };
