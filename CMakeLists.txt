@@ -36,7 +36,14 @@ target_include_directories(${PROJECT_NAME} PRIVATE
   libraries/qoi
 )
 
-target_link_libraries(${PROJECT_NAME} geode-sdk opengl32)
+target_link_libraries(${PROJECT_NAME} geode-sdk)
+if(WIN32)
+  target_link_libraries(${PROJECT_NAME} opengl32)
+elseif(APPLE)
+  target_link_libraries(${PROJECT_NAME} "-framework OpenGL -framework Cocoa")
+elseif(ANDROID)
+  target_link_libraries(${PROJECT_NAME} GLESv2)
+endif()
 
 set(TRACY_ENABLE OFF CACHE BOOL "" FORCE)
 set(TRACY_ON_DEMAND ON CACHE BOOL "" FORCE)
