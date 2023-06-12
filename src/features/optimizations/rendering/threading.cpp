@@ -5,6 +5,8 @@ using namespace geode::prelude;
 
 #include <shared_pool.hpp>
 
+// TODO: mac addresses for ccGLEnable and CCTextureAtlas::drawQuads
+#ifdef GEODE_IS_WINDOWS
 struct ThreadedSpriteBatchNode : geode::Modify<ThreadedSpriteBatchNode, CCSpriteBatchNode> {
     void draw() {
         ZoneScoped;
@@ -48,3 +50,4 @@ struct ThreadedSpriteBatchNode : geode::Modify<ThreadedSpriteBatchNode, CCSprite
         //self.setEnabled(true);
     }
 };
+#endif
