@@ -5,6 +5,8 @@ using namespace geode::prelude;
 #include <Geode/modify/CCDirector.hpp>
 #include <Geode/modify/CCEGLViewProtocol.hpp>
 
+// TODO: mac address for setContentScaleFactor, setIgnoreContentScaleFactor, setDesignResolutionSize
+#ifdef GEODE_IS_WINDOWS
 class umm;
 template<>
 struct geode::modifier::ModifyDerive<umm, umm> {
@@ -89,15 +91,12 @@ struct StatsCCDirector : geode::Modify<StatsCCDirector, CCDirector> {
         if(!same)
             createStatsLabel();
     }
-// TODO: mac address for CCDirector::setContentScaleFactor
-#ifdef GEODE_IS_WINDOWS
     void setContentScaleFactor(float f) {
         bool same = m_fContentScaleFactor == f;
         CCDirector::setContentScaleFactor(f);
         if(!same)
             createStatsLabel();
     }
-#endif
 
     void showStats() {
         TracyPlot("Draw Calls", static_cast<int64_t>(g_uNumberOfDraws));
@@ -110,3 +109,4 @@ struct StatsCCEGLViewProtocol : geode::Modify<StatsCCEGLViewProtocol, CCEGLViewP
         reinterpret_cast<StatsCCDirector*>(CCDirector::sharedDirector())->createStatsLabel();
     }
 };
+#endif

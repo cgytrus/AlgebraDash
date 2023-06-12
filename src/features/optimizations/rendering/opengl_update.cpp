@@ -1,12 +1,11 @@
-//#include <GL/glew.h>
 #include <Tracy.hpp>
 #include <TracyOpenGL.hpp>
 #include <Geode/Geode.hpp>
 using namespace geode::prelude;
-#include <glew_add.h>
 
 // TODO: a lot of addresses but is this even needed on mac?
 #ifdef GEODE_IS_WINDOWS
+#include <glew_add.h>
 
 #include <Geode/modify/CCEGLView.hpp>
 
