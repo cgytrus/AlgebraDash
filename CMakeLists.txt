@@ -15,6 +15,7 @@ add_library(${PROJECT_NAME} SHARED
   src/features/improvements/smooth_particles.cpp
   src/features/optimizations/loading/qoi_cache.cpp
   src/features/optimizations/loading/threading.cpp
+  src/features/optimizations/processing/rotations.cpp
   src/features/optimizations/rendering/fast_batch_sort.cpp
   src/features/optimizations/rendering/opengl_update.cpp
   src/features/optimizations/rendering/threading.cpp
@@ -39,6 +40,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME} geode-sdk)
 if(WIN32)
   target_link_libraries(${PROJECT_NAME} opengl32)
+  #target_compile_options(${PROJECT_NAME} PRIVATE "/fp:fast" "/arch:AVX512")
 elseif(APPLE)
   target_link_libraries(${PROJECT_NAME} "-framework OpenGL -framework Cocoa")
 elseif(ANDROID)

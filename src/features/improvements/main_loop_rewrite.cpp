@@ -51,8 +51,6 @@ struct MainLoopRewrite : geode::Modify<MainLoopRewrite, CCApplication> {
         m_bFullscreen = view->m_bIsFullscreen;
         bool prevFullscreen = m_bFullscreen;
         while(true) {
-            ZoneScopedN("main loop");
-
             if(view->windowShouldClose()) {
                 ZoneScopedN("shutdown");
                 if(!m_bShutdownCalled)
@@ -72,6 +70,7 @@ struct MainLoopRewrite : geode::Modify<MainLoopRewrite, CCApplication> {
             long long timeDiff = currentTime.QuadPart - prevTime.QuadPart;
             if(!m_bVerticalSyncEnabled && timeDiff < m_nAnimationInterval.QuadPart)
                 continue;
+            ZoneScopedN("main loop frame");
             prevTime.QuadPart = currentTime.QuadPart;
 
             if(m_bUpdateController) {
