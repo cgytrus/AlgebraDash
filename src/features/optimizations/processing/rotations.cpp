@@ -168,9 +168,9 @@ struct FastRotations : geode::Modify<FastRotations, GJBaseGameLayer> {
         newSection = obj->m_section;
         if(newSection == oldSection)
             return;
-        if(m_lastVisibleSection <= newSection && newSection <= m_firstVisibleSection)
+        if(m_firstVisibleSection <= newSection && newSection <= m_lastVisibleSection)
             return;
-        if(!(m_lastVisibleSection <= oldSection && oldSection <= m_firstVisibleSection))
+        if(!(m_firstVisibleSection <= oldSection && oldSection <= m_lastVisibleSection))
             return;
         {
             std::unique_lock lock(processedGroupsMutex);
