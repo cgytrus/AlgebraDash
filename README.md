@@ -1,5 +1,5 @@
 # AlgebraDash
-A general optimization mod for Geometry Gash
+A general optimization mod for Geometry Dash
 
 *(algebra is simpler and faster than geometry, right..?)*
 
