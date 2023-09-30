@@ -7,8 +7,10 @@ using namespace geode::prelude;
 #ifdef GEODE_IS_WINDOWS
 struct ForceRGBA8888 : geode::Modify<ForceRGBA8888, CCTexture2D> {
     static void setDefaultAlphaPixelFormat(CCTexture2DPixelFormat format) {
-        if(!Mod::get()->getSettingValue<bool>("force-rgba8888"))
-            return CCTexture2D::setDefaultAlphaPixelFormat(format);
+        if(!Mod::get()->getSettingValue<bool>("force-rgba8888")) {
+            CCTexture2D::setDefaultAlphaPixelFormat(format);
+            return;
+        }
         CCTexture2D::setDefaultAlphaPixelFormat(kCCTexture2DPixelFormat_RGBA8888);
     }
     static CCTexture2DPixelFormat defaultAlphaPixelFormat() {

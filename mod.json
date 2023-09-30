@@ -9,10 +9,11 @@
     "settings": {
         "antialiasing": {
             "name": "Antialiasing",
-            "description": "Enables MSAA antialiasing to improve visual quality. Doesn't work on macOS. Requires restart",
+            "description": "Enables antialiasing to improve visual quality. Goes from Off (0) to MSAA x16 (4). Doesn't work on macOS. Requires restart",
             "type": "int",
-            "one-of": [ 1, 2, 4, 8, 16 ],
-            "default": 8
+            "min": 0,
+            "max": 4,
+            "default": 3
         },
         "fast-alt-tab": {
             "name": "Fast Alt Tab",
