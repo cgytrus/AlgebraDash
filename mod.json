@@ -1,8 +1,30 @@
 {
-    "geode": "1.0.0",
+    "geode": "1.3.4",
     "version": "v0.0.3",
     "id": "cgytrus.algebradash",
-    "name": "AlgebraDash",
+    "name": "Algebra Dash",
     "developer": "ConfiG",
-    "description": ""
+    "description": "",
+    "early-load": true,
+    "settings": {
+        "antialiasing": {
+            "name": "Antialiasing",
+            "description": "Enables MSAA antialiasing to improve visual quality. Doesn't work on macOS. Requires restart",
+            "type": "int",
+            "one-of": [ 1, 2, 4, 8, 16 ],
+            "default": 8
+        },
+        "fast-alt-tab": {
+            "name": "Fast Alt Tab",
+            "description": "Disables saving when minimizing the game",
+            "type": "bool",
+            "default": false
+        },
+        "force-rgba8888": {
+            "name": "Force RGBA8888",
+            "description": "Makes the game always load textures as RGBA8888 instead of RGBA4444 to improve visual quality. Doesn't work on macOS. Requires texture reload",
+            "type": "bool",
+            "default": false
+        }
+    }
 }

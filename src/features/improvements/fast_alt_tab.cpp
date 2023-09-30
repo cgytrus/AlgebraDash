@@ -5,11 +5,15 @@ using namespace geode::prelude;
 bool isUnfocusing = false;
 struct FastAltTab : geode::Modify<FastAltTab, AppDelegate> {
     void applicationDidEnterBackground() {
+        if(!Mod::get()->getSettingValue<bool>("fast-alt-tab"))
+            return AppDelegate::applicationDidEnterBackground();
         isUnfocusing = true;
         AppDelegate::applicationDidEnterBackground();
         isUnfocusing = false;
     }
     void trySaveGame() {
+        if(!Mod::get()->getSettingValue<bool>("fast-alt-tab"))
+            return AppDelegate::applicationDidEnterBackground();
         if(isUnfocusing) {
             log::debug("fast alt tab: skipping save");
             return;

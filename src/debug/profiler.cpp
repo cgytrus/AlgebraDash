@@ -18,7 +18,8 @@ struct MarkFrame : geode::Modify<MarkFrame, CCEGLView> {
     void swapBuffers() {
         ZoneScopedN("CCEGLView::swapBuffers");
         CCEGLView::swapBuffers();
-        TracyGpuCollect;
+        // TODO: this crashes??????
+        //TracyGpuCollect;
         FrameMark;
     }
 };
@@ -153,6 +154,8 @@ PROFILER_HOOK(void, GJEffectManager, calculateLightBGColor, ccColor3B)
  // TODO address 0xebda0 // PROFILER_HOOK(FUN_004ebda0)
 PROFILER_HOOK(void, GameObject, addColorSpriteToParent, bool)
 PROFILER_HOOK(void, AnimatedGameObject, updateChildSpriteColor, ccColor3B)
+PROFILER_HOOK(ccColor3B&, GameObject, colorForMode, int, bool)
+PROFILER_HOOK(ccColor3B&, GameObject, getActiveColorForMode, int, bool)
 PROFILER_HOOK(void, GameObject, setObjectColor, const ccColor3B&)
 
 PROFILER_HOOK(void, GameObject, updateOrientedBox)
