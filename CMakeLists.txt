@@ -6,8 +6,8 @@ project(AlgebraDash VERSION 0.0.3)
 
 add_library(${PROJECT_NAME} SHARED
   src/shared_pool.cpp
-  src/debug/profiler.cpp
-  src/debug/stats.cpp
+  #src/debug/profiler.cpp
+  #src/debug/stats.cpp
   src/features/improvements/antialiasing.cpp
   src/features/improvements/fast_alt_tab.cpp
   src/features/improvements/force_rgba8888.cpp
