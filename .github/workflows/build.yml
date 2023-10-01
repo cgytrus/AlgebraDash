@@ -28,21 +28,21 @@ jobs:
 
     - name: Build
       uses: geode-sdk/build-geode-mod@main
-      with:
-        combine: true
+#      with:
+#        combine: true
 
-  package:
-    name: Package builds
-    runs-on: ubuntu-latest
-    needs: ['build']
-
-    steps:
-    - name: Combine Builds
-      uses: geode-sdk/build-geode-mod@combine
-      id: build
-
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: Build Output
-        path: ${{ steps.build.outputs.build-output }}
+#  package:
+#    name: Package builds
+#    runs-on: ubuntu-latest
+#    needs: ['build']
+#
+#    steps:
+#    - name: Combine Builds
+#      uses: geode-sdk/build-geode-mod@combine
+#      id: build
+#
+#    - name: Upload Artifact
+#      uses: actions/upload-artifact@v3
+#      with:
+#        name: Build Output
+#        path: ${{ steps.build.outputs.build-output }}
