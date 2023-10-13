@@ -161,8 +161,6 @@ struct update_game_object_data_t {
     float cameraCenterX;
     CCPoint cameraPosition;
 
-    gd::map<short, bool> hasColors;
-
     float totalTime;
     int activeEnterEffect;
 
@@ -259,20 +257,21 @@ void applyEnterEffect(update_game_object_data_t& data, GameObject& gameObject) {
         gameObject.m_activeEnterEffect = 0;
 }
 
+void preUpdateGameObject(GameObject& gameObject, gd::map<short, bool>& hasColors) {
+    if (gameObject.m_active && !hasColors.empty()) {
+        bool hasBaseColor = hasColors[(short)gameObject.m_baseColorID];
+        bool hasDetailColor = gameObject.m_detailSprite != nullptr &&
+            hasColors[(short)gameObject.m_detailColorID];
+        if (hasBaseColor || hasDetailColor) {
+            gameObject.addMainSpriteToParent(false);
+            gameObject.addColorSpriteToParent(false);
+        }
+    }
+
+    gameObject.activateObject();
+}
 void updateGameObject(GameObject& gameObject, update_game_object_data_t data) {
     ZoneScoped;
-
-    //if(gameObject.m_active && !data.hasColors.empty()) {
-    //    bool hasBaseColor = data.hasColors[(short)gameObject.m_baseColorID];
-    //    bool hasDetailColor = gameObject.m_detailSprite != nullptr &&
-    //        data.hasColors[(short)gameObject.m_detailColorID];
-    //    if(hasBaseColor || hasDetailColor) {
-    //        gameObject.addMainSpriteToParent(false);
-    //        gameObject.addColorSpriteToParent(false);
-    //    }
-    //}
-
-    //gameObject.activateObject();
 
     updateMainColor(&gameObject);
     updateSecondaryColor(&gameObject);
@@ -343,7 +342,6 @@ void updateGameObject(GameObject& gameObject, update_game_object_data_t data) {
         }
     }
 
-    //PlayLayer::get()->applyEnterEffect(&gameObject);
     applyEnterEffect(data, gameObject);
 
     bool isFlipping = data.mirrorTransition != 0.f && data.mirrorTransition != 1.f;
@@ -413,10 +411,18 @@ struct NewPlayLayer : geode::Modify<NewPlayLayer, PlayLayer> {
         m_player1->m_meteringValue = data.meteringValue;
         m_player2->m_meteringValue = data.meteringValue;
 
+        auto sectionObjects = CCArrayExt<CCArray*>(m_sectionObjects);
+        int sectionCount = (int)sectionObjects.size();
+
         auto director = CCDirector::sharedDirector();
         CCPoint winSize = director->getWinSize();
-        int startSection = (int)std::floor(m_cameraPosition.x / 100.f) - 1;
-        int endSection = (int)std::ceil((m_cameraPosition.x + winSize.x) / 100.f) + 1;
+        int startSection = std::clamp((int)std::floor(m_cameraPosition.x / 100.f) - 1, 0, sectionCount - 1);
+        int endSection = std::clamp((int)std::ceil((m_cameraPosition.x + winSize.x) / 100.f) + 1, 0, sectionCount - 1);
+
+        int lastInvisibleSectionLeft =
+            m_lastVisibleSection < startSection ? m_lastVisibleSection : startSection - 1;
+        int firstInvisibleSectionRight =
+            m_firstVisibleSection > endSection ? m_firstVisibleSection : endSection + 1;
 
         CCRect camRect(m_cameraPosition.x, m_cameraPosition.y, winSize.x, winSize.y);
         float camLeft = camRect.getMinX();
@@ -442,8 +448,6 @@ struct NewPlayLayer : geode::Modify<NewPlayLayer, PlayLayer> {
         data.boundRight = data.playerPos + 110.f;
         data.offsetBoundRight = data.screenRight - data.boundRight - 90.f;
 
-        data.hasColors = m_hasColors;
-
         data.totalTime = m_totalTime;
         data.activeEnterEffect = m_activeEnterEffect;
 
@@ -454,23 +458,17 @@ struct NewPlayLayer : geode::Modify<NewPlayLayer, PlayLayer> {
         data.cameraFlip = m_cameraFlip;
         data.unk3EC = unk3EC;
 
-        auto sectionObjects = CCArrayExt<CCArray*>(m_sectionObjects);
-        int sectionCount = (int)sectionObjects.size();
-
         {
-            ZoneScopedN("loop 0 (3): deactivate invisible objects");
-            for (const auto& gameObject : CCArrayExt<GameObject*>(m_processedGroups)) {
-                if(gameObject->m_section < startSection || gameObject->m_section > endSection)
-                    gameObject->deactivateObject(true);
+            ZoneScopedN("loop 0: hide previously visible objects left");
+            for (auto i = m_firstVisibleSection; i <= lastInvisibleSectionLeft; i++) {
+                for (const auto& gameObject : CCArrayExt<GameObject*>(sectionObjects[i])) {
+                    gameObject->m_shouldHide = true;
+                }
             }
-            m_processedGroups->removeAllObjects();
         }
-
         {
-            ZoneScopedN("loop 0-2: hide previously visible objects");
-            for(auto i = m_firstVisibleSection; i <= m_lastVisibleSection; i++) {
-                if(i < 0 || i >= sectionCount)
-                    continue;
+            ZoneScopedN("loop 0.5: hide previously visible objects right");
+            for (auto i = firstInvisibleSectionRight; i <= m_lastVisibleSection; i++) {
                 for (const auto& gameObject : CCArrayExt<GameObject*>(sectionObjects[i])) {
                     gameObject->m_shouldHide = true;
                 }
@@ -480,17 +478,18 @@ struct NewPlayLayer : geode::Modify<NewPlayLayer, PlayLayer> {
         {
             ZoneScopedN("loop 1: queue objects for update");
             for(auto i = startSection; i <= endSection; i++) {
-                if(i < 0 || i >= sectionCount)
-                    continue;
                 bool isOnEdge = i <= startSection + 1 || i >= endSection - 1;
                 for (const auto& gameObject : CCArrayExt<GameObject*>(sectionObjects[i])) {
                     if(gameObject->m_groupDisabled) {
                         gameObject->m_shouldHide = true;
+                        if (!m_fullReset)
+                            gameObject->deactivateObject(false);
                         continue;
                     }
                     if(gameObject->m_active && !isOnEdge) {
                         gameObject->m_shouldHide = false;
                         m_objectsToUpdate->addObject(gameObject);
+                        preUpdateGameObject(*gameObject, m_hasColors);
                         continue;
                     }
                     auto rect = gameObject->getObjectTextureRect();
@@ -498,20 +497,28 @@ struct NewPlayLayer : geode::Modify<NewPlayLayer, PlayLayer> {
                         (rect.getMinX() > camRight || rect.getMaxX() < camLeft ||
                         rect.getMinY() > camTop || rect.getMaxY() < camBottom)) {
                         gameObject->m_shouldHide = true;
+                        if (!m_fullReset)
+                            gameObject->deactivateObject(false);
                         continue;
                     }
                     gameObject->m_shouldHide = false;
                     m_objectsToUpdate->addObject(gameObject);
+                    preUpdateGameObject(*gameObject, m_hasColors);
                 }
             }
         }
 
-        {
-            ZoneScopedN("loop 2: deactivate previously visible objects");
-            if(!m_fullReset) {
-                for(auto i = m_firstVisibleSection; i <= m_lastVisibleSection; i++) {
-                    if(i < 0 || i >= sectionCount)
-                        continue;
+        if(!m_fullReset) {
+            {
+                ZoneScopedN("loop 2: deactivate previously visible objects left");
+                for (auto i = m_firstVisibleSection; i <= lastInvisibleSectionLeft; i++) {
+                    for (const auto& gameObject : CCArrayExt<GameObject*>(sectionObjects[i]))
+                        gameObject->deactivateObject(false);
+                }
+            }
+            {
+                ZoneScopedN("loop 2.5: deactivate previously visible objects right");
+                for (auto i = firstInvisibleSectionRight; i <= m_lastVisibleSection; i++) {
                     for (const auto& gameObject : CCArrayExt<GameObject*>(sectionObjects[i]))
                         gameObject->deactivateObject(false);
                 }
@@ -519,20 +526,12 @@ struct NewPlayLayer : geode::Modify<NewPlayLayer, PlayLayer> {
         }
 
         {
-            ZoneScopedN("loop 4-0.1: pre update objects");
-            for (const auto& gameObject : CCArrayExt<GameObject*>(m_objectsToUpdate)) {
-                if(gameObject->m_active && !data.hasColors.empty()) {
-                    bool hasBaseColor = data.hasColors[(short)gameObject->m_baseColorID];
-                    bool hasDetailColor = gameObject->m_detailSprite != nullptr &&
-                        data.hasColors[(short)gameObject->m_detailColorID];
-                    if(hasBaseColor || hasDetailColor) {
-                        gameObject->addMainSpriteToParent(false);
-                        gameObject->addColorSpriteToParent(false);
-                    }
-                }
-
-                gameObject->activateObject();
+            ZoneScopedN("loop 3: deactivate invisible objects after moving");
+            for (const auto& gameObject : CCArrayExt<GameObject*>(m_processedGroups)) {
+                if(gameObject->m_section < startSection || gameObject->m_section > endSection)
+                    gameObject->deactivateObject(true);
             }
+            m_processedGroups->removeAllObjects();
         }
 
         {
