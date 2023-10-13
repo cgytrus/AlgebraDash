@@ -19,7 +19,7 @@ add_library(${PROJECT_NAME} SHARED
   src/features/optimizations/rendering/fast_batch_sort.cpp
   #src/features/optimizations/rendering/opengl_update.cpp
   src/features/optimizations/rendering/threading.cpp
-  #src/features/optimizations/rendering/updatevisibility_rewrite.cpp
+  src/features/optimizations/rendering/updatevisibility_rewrite.cpp
 )
 
 if (NOT DEFINED ENV{GEODE_SDK})

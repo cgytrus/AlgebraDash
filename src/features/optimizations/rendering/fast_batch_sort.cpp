@@ -35,6 +35,8 @@ struct FastSpriteBatchNodeSort : geode::Modify<FastSpriteBatchNodeSort, CCSprite
             int maxZOrder = INT_MIN;
             unsigned int maxOrderOfArrival = 0;
             for(size_t i = 0; i < length; i++) {
+                if (!arr[i])
+                    continue;
                 int zOrder = arr[i]->getZOrder();
                 if(zOrder > maxZOrder)
                     maxZOrder = zOrder;
