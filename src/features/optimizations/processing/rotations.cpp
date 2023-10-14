@@ -97,9 +97,10 @@ struct FastRotations : geode::Modify<FastRotations, GJBaseGameLayer> {
                     if(!obj)
                         break;
                     obj->m_wasForcedRotatedPositionUpdateIdk = forceUpdate;
-                    if(!obj->m_unk45A && !obj->m_unk42C) {
+
+                    if(!obj->m_inOptimizedGroup && !obj->m_queuedForPositionUpdate) {
                         obj->m_firstPosition = obj->getRealPosition();
-                        obj->m_unk42C = true;
+                        obj->m_queuedForPositionUpdate = true;
                         {
                             std::unique_lock lock(objectsVecMutex);
                             m_objectsVec.push_back(obj);
@@ -108,12 +109,14 @@ struct FastRotations : geode::Modify<FastRotations, GJBaseGameLayer> {
                         obj->m_isOrientedRectDirty = true;
                     }
                     obj->m_textureRectDirty = true;
+
                     rotateObjectPosition(obj, rotationRad, parentPos);
                     if(!lockRot)
                         rotateObject(obj, rotationDeg);
                     checkSectionChange(obj);
-                    if(obj->m_unk45A && !obj->m_unk42C) {
-                        obj->m_unk42C = true;
+
+                    if(obj->m_inOptimizedGroup && !obj->m_queuedForPositionUpdate) {
+                        obj->m_queuedForPositionUpdate = true;
                         {
                             std::unique_lock lock(disabledObjectsMutex);
                             m_disabledObjects.push_back(obj);

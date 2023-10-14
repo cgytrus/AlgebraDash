@@ -66,10 +66,10 @@ struct FastMoves : geode::Modify<FastMoves, GJBaseGameLayer> {
     void moveObject(GameObject* obj, float moveX, float moveY, CCObjectType moveObjType) {
         ZoneScoped;
 
-        if (!obj->m_unk45A) {
-            if (!obj->m_unk42C) {
+        if (!obj->m_inOptimizedGroup) {
+            if (!obj->m_queuedForPositionUpdate) {
                 obj->m_firstPosition = obj->m_startPosition + obj->m_startPosOffset;
-                obj->m_unk42C = true;
+                obj->m_queuedForPositionUpdate = true;
                 {
                     std::unique_lock lock(objectsVecMutex);
                     m_objectsVec.push_back(obj);
@@ -78,19 +78,19 @@ struct FastMoves : geode::Modify<FastMoves, GJBaseGameLayer> {
                 obj->m_isOrientedRectDirty = true;
             }
             if (moveObjType == CCObjectType::GameObject)
-                obj->m_unk42D = true;
+                obj->m_shouldUpdateFirstPosition = true;
         }
         obj->m_textureRectDirty = true;
 
         if (moveY != 0.f)
-            obj->m_startPosOffset.y = obj->m_startPosOffset.y + moveY;
+            obj->m_startPosOffset.y += moveY;
         if (moveX != 0.f && !obj->m_tintTrigger) {
-            obj->m_startPosOffset.x = obj->m_startPosOffset.x + moveX;
+            obj->m_startPosOffset.x += moveX;
             checkSectionChange(obj);
         }
 
-        if(obj->m_unk45A && !obj->m_unk42C) {
-            obj->m_unk42C = true;
+        if (obj->m_inOptimizedGroup && !obj->m_queuedForPositionUpdate) {
+            obj->m_queuedForPositionUpdate = true;
             {
                 std::unique_lock lock(disabledObjectsMutex);
                 m_disabledObjects.push_back(obj);
