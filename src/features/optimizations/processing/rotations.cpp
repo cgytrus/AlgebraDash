@@ -7,10 +7,10 @@ using namespace geode::prelude;
 #include <shared_pool.hpp>
 
 #ifdef GEODE_IS_WINDOWS
-TracyLockable(std::mutex, objectsVecMutex);
-TracyLockable(std::mutex, disabledObjectsMutex);
-TracyLockable(std::mutex, reorderObjectSectionMutex);
-TracyLockable(std::mutex, processedGroupsMutex);
+static TracyLockable(std::mutex, objectsVecMutex);
+static TracyLockable(std::mutex, disabledObjectsMutex);
+static TracyLockable(std::mutex, reorderObjectSectionMutex);
+static TracyLockable(std::mutex, processedGroupsMutex);
 struct FastRotations : geode::Modify<FastRotations, GJBaseGameLayer> {
     void processRotationActions() {
         ZoneScoped;
@@ -18,7 +18,7 @@ struct FastRotations : geode::Modify<FastRotations, GJBaseGameLayer> {
         CCDictElement* el;
         auto dict = m_effectManager->m_rotationNodes;
         CCDICT_FOREACH(dict, el) {
-            ZoneScopedN("m_rotationNodes itertaion");
+            ZoneScopedN("m_rotationNodes iteration");
             auto moveNode = (CCMoveCNode*)el->getObject();
             int moveTag = moveNode->getTag();
 
@@ -37,15 +37,15 @@ struct FastRotations : geode::Modify<FastRotations, GJBaseGameLayer> {
                 m_staticGroups[moveTag] = staticObjects;
             }
 
-            auto optimizedGroups = m_optimizedGroups[moveTag];
-            if(!optimizedGroups) {
-                optimizedGroups = CCArray::create();
-                m_optimizedGroupDict->setObject(optimizedGroups, moveTag);
-                m_optimizedGroups[moveTag] = optimizedGroups;
+            auto optimizedObjects = m_optimizedGroups[moveTag];
+            if(!optimizedObjects) {
+                optimizedObjects = CCArray::create();
+                m_optimizedGroupDict->setObject(optimizedObjects, moveTag);
+                m_optimizedGroups[moveTag] = optimizedObjects;
             }
 
             processRotationsInner(staticObjects, parentGroup, moveNode->m_staticRotation, moveNode);
-            processRotationsInner(optimizedGroups, parentGroup, moveNode->m_optimizedRotation, moveNode);
+            processRotationsInner(optimizedObjects, parentGroup, moveNode->m_optimizedRotation, moveNode);
         }
     }
 
