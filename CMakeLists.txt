@@ -33,11 +33,7 @@ add_subdirectory($ENV{GEODE_SDK} $ENV{GEODE_SDK}/build)
 
 setup_geode_mod(${PROJECT_NAME})
 
-target_include_directories(${PROJECT_NAME} PRIVATE
-  include
-  libraries/thread-pool/include
-  libraries/qoi
-)
+target_include_directories(${PROJECT_NAME} PRIVATE include)
 
 target_link_libraries(${PROJECT_NAME} geode-sdk)
 if(WIN32)
@@ -49,6 +45,12 @@ elseif(ANDROID)
   target_link_libraries(${PROJECT_NAME} GLESv2)
 endif()
 
+CPMAddPackage("gh:wx257osn2/qoixx#eac3b33")
+target_include_directories(${PROJECT_NAME} PRIVATE ${qoixx_SOURCE_DIR}/include)
+
+CPMAddPackage("gh:bshoshany/thread-pool#cabb3df")
+target_include_directories(${PROJECT_NAME} PRIVATE ${thread-pool_SOURCE_DIR}/include)
+
 set(TRACY_ENABLE OFF CACHE BOOL "" FORCE)
 set(TRACY_ON_DEMAND ON CACHE BOOL "" FORCE)
 
@@ -57,6 +59,6 @@ set(TRACY_ONLY_LOCALHOST OFF CACHE BOOL "" FORCE)
 set(TRACY_NO_CALLSTACK OFF CACHE BOOL "" FORCE)
 set(TRACY_CALLSTACK OFF CACHE BOOL "" FORCE)
 
-add_subdirectory(libraries/tracy)
-target_include_directories(${PROJECT_NAME} PRIVATE libraries/tracy/public/tracy)
+CPMAddPackage("gh:wolfpld/tracy#93537df")
+target_include_directories(${PROJECT_NAME} PRIVATE ${Tracy_SOURCE_DIR}/public/tracy)
 target_link_libraries(${PROJECT_NAME} Tracy::TracyClient)
