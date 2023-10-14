@@ -102,7 +102,7 @@ struct FastRotations : geode::Modify<FastRotations, GJBaseGameLayer> {
                         obj->m_firstPosition = obj->getRealPosition();
                         obj->m_queuedForPositionUpdate = true;
                         {
-                            std::unique_lock lock(objectsVecMutex);
+                            std::scoped_lock lock(objectsVecMutex);
                             m_objectsVec.push_back(obj);
                         }
                         obj->m_isObjectRectDirty = true;
@@ -118,7 +118,7 @@ struct FastRotations : geode::Modify<FastRotations, GJBaseGameLayer> {
                     if(obj->m_inOptimizedGroup && !obj->m_queuedForPositionUpdate) {
                         obj->m_queuedForPositionUpdate = true;
                         {
-                            std::unique_lock lock(disabledObjectsMutex);
+                            std::scoped_lock lock(disabledObjectsMutex);
                             m_disabledObjects.push_back(obj);
                         }
                     }
@@ -165,7 +165,7 @@ struct FastRotations : geode::Modify<FastRotations, GJBaseGameLayer> {
         if(newSection == oldSection)
             return;
         {
-            std::unique_lock lock(reorderObjectSectionMutex);
+            std::scoped_lock lock(reorderObjectSectionMutex);
             reorderObjectSection(obj);
         }
         newSection = obj->m_section;
@@ -176,7 +176,7 @@ struct FastRotations : geode::Modify<FastRotations, GJBaseGameLayer> {
         if(!(m_firstVisibleSection <= oldSection && oldSection <= m_lastVisibleSection))
             return;
         {
-            std::unique_lock lock(processedGroupsMutex);
+            std::scoped_lock lock(processedGroupsMutex);
             if(!m_processedGroups->containsObject(obj))
                 m_processedGroups->addObject(obj);
         }

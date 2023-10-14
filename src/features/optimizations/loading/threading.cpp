@@ -33,7 +33,7 @@ public:
         CCTexture2D* texture = (CCTexture2D*)m_pTextures->objectForKey(pathKey.c_str());
         if(texture) {
             {
-                std::unique_lock lock(loadedImagesMutex);
+                std::scoped_lock lock(loadedImagesMutex);
                 loadedImages.push_back({pImage, plistPath, pathKey, texture->getPixelFormat()});
             }
             return;
@@ -78,7 +78,7 @@ public:
             }
 
             {
-                std::unique_lock lock(loadedImagesMutex);
+                std::scoped_lock lock(loadedImagesMutex);
                 loadedImages.push_back({pImage, plistPath, pathKey, pixelFormat});
             }
         });
@@ -86,7 +86,7 @@ public:
 
     void finishAddImage() {
         ZoneScoped;
-        std::unique_lock lock(loadedImagesMutex);
+        std::scoped_lock lock(loadedImagesMutex);
 
         auto spriteFrameCache = CCSpriteFrameCache::sharedSpriteFrameCache();
 
