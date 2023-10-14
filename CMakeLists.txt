@@ -45,7 +45,7 @@ elseif(ANDROID)
   target_link_libraries(${PROJECT_NAME} GLESv2)
 endif()
 
-CPMAddPackage("gh:wx257osn2/qoixx#eac3b33")
+CPMAddPackage("gh:cgytrus/qoixx#f36c102")
 target_include_directories(${PROJECT_NAME} PRIVATE ${qoixx_SOURCE_DIR}/include)
 
 CPMAddPackage("gh:bshoshany/thread-pool#cabb3df")
