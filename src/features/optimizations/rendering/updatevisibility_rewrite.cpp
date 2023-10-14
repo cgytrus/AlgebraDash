@@ -525,14 +525,14 @@ struct NewPlayLayer : geode::Modify<NewPlayLayer, PlayLayer> {
             }
         }
 
-        {
-            ZoneScopedN("loop 3: deactivate invisible objects after moving");
-            for (const auto& gameObject : CCArrayExt<GameObject*>(m_processedGroups)) {
-                if(gameObject->m_section < startSection || gameObject->m_section > endSection)
-                    gameObject->deactivateObject(true);
-            }
+        //{
+        //    ZoneScopedN("loop 3: deactivate invisible objects after moving");
+        //    for (const auto& gameObject : CCArrayExt<GameObject*>(m_processedGroups)) {
+        //        if(gameObject->m_section < startSection || gameObject->m_section > endSection)
+        //            gameObject->deactivateObject(true);
+        //    }
             m_processedGroups->removeAllObjects();
-        }
+        //}
 
         {
             ZoneScopedN("loop 4: update objects");
