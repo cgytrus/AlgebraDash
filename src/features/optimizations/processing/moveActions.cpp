@@ -7,10 +7,69 @@ using namespace geode::prelude;
 #include <shared_pool.hpp>
 
 #ifdef GEODE_IS_WINDOWS
-static TracyLockable(std::mutex, objectsVecMutex);
-static TracyLockable(std::mutex, disabledObjectsMutex);
-static TracyLockable(std::mutex, reorderObjectSectionMutex);
+std::vector<std::vector<GameObject*>*> objectsVecVec;
+std::vector<std::vector<GameObject*>*> disabledObjectsVec;
+std::vector<std::vector<GameObject*>*> reorderObjectsVec;
 struct FastMoveActions : geode::Modify<FastMoveActions, GJBaseGameLayer> {
+    void processMoveActionsStep(float dt) {
+        ZoneScoped;
+
+        m_objectsVec.clear();
+        m_disabledObjects.clear();
+
+        for (auto& vec : objectsVecVec)
+            vec->clear();
+        for (auto& vec : disabledObjectsVec)
+            vec->clear();
+        for (auto& vec : reorderObjectsVec)
+            vec->clear();
+
+        processRotationActions();
+        processMoveActions();
+        processPlayerFollowActions(dt);
+        processFollowActions();
+
+        for (const auto& reorderObjects : reorderObjectsVec)
+            for (const auto& obj : *reorderObjects)
+                reorderObjectSection(obj);
+
+        for (const auto& obj : m_objectsVec) {
+            obj->m_queuedForPositionUpdate = false;
+            if (m_objectsAreDisabled)
+                obj->quickUpdatePosition();
+            if (obj->m_shouldUpdateFirstPosition) {
+                obj->m_shouldUpdateFirstPosition = false;
+                obj->m_firstPosition = obj->getRealPosition();
+            }
+        }
+        for (const auto& objectsVec : objectsVecVec) {
+            for (const auto& obj : *objectsVec) {
+                obj->m_queuedForPositionUpdate = false;
+                if (m_objectsAreDisabled)
+                    obj->quickUpdatePosition();
+                if (obj->m_shouldUpdateFirstPosition) {
+                    obj->m_shouldUpdateFirstPosition = false;
+                    obj->m_firstPosition = obj->getRealPosition();
+                }
+            }
+        }
+
+        if (m_objectsAreDisabled) {
+            for (const auto& obj : m_disabledObjects) {
+                obj->m_queuedForPositionUpdate = false;
+                if (m_objectsAreDisabled)
+                    obj->quickUpdatePosition();
+            }
+            for (const auto& disabledObjects : disabledObjectsVec) {
+                for (const auto& obj : *disabledObjects) {
+                    obj->m_queuedForPositionUpdate = false;
+                    if (m_objectsAreDisabled)
+                        obj->quickUpdatePosition();
+                }
+            }
+        }
+    }
+
     void processMoveActions() {
         ZoneScoped;
 
@@ -45,90 +104,59 @@ struct FastMoveActions : geode::Modify<FastMoveActions, GJBaseGameLayer> {
             return;
         CCObjectType moveObjType = moveNode->getObjType();
         CCObject** arr = objects->data->arr;
-        BS::multi_future<void> moveJob = sharedPool().parallelize_loop(0, objects->data->num,
-            [this, arr, moveX, moveY, moveObjType](unsigned int a, unsigned int b) {
-                ZoneScopedN("move job");
+        auto& pool = sharedPool();
+        BS::blocks blks(0, objects->data->num, pool.get_thread_count());
+        if (blks.get_total_size() <= 0)
+            return;
+        BS::multi_future<void> moveJob(blks.get_num_blocks());
+        while (objectsVecVec.size() < blks.get_num_blocks())
+            objectsVecVec.push_back(new std::vector<GameObject*>());
+        while (disabledObjectsVec.size() < blks.get_num_blocks())
+            disabledObjectsVec.push_back(new std::vector<GameObject*>());
+        while (reorderObjectsVec.size() < blks.get_num_blocks())
+            reorderObjectsVec.push_back(new std::vector<GameObject*>());
+        for (size_t i = 0; i < blks.get_num_blocks(); ++i) {
+            auto* objectsVec = objectsVecVec[i];
+            auto* disabledObjects = disabledObjectsVec[i];
+            auto* reorderObjects = reorderObjectsVec[i];
+            moveJob[i] = pool.submit(
+                [=, this](unsigned int a, unsigned int b) {
+                    ZoneScopedN("move job");
+                    for (unsigned int i = a; i < b; ++i) {
+                        auto* obj = (GameObject*)arr[i];
+                        if (!obj)
+                            break;
+                        if (!obj->m_inOptimizedGroup) {
+                            if (!obj->m_queuedForPositionUpdate) {
+                                obj->m_firstPosition = obj->m_startPosition + obj->m_startPosOffset;
+                                obj->m_queuedForPositionUpdate = true;
+                                objectsVec->push_back(obj);
+                                obj->m_isObjectRectDirty = true;
+                                obj->m_isOrientedRectDirty = true;
+                            }
+                            if (moveObjType == CCObjectType::GameObject)
+                                obj->m_shouldUpdateFirstPosition = true;
+                        }
+                        obj->m_textureRectDirty = true;
 
-                std::vector<GameObject*> objects;
-                objects.reserve(b - a);
-                std::vector<GameObject*> disabledObjects;
-                disabledObjects.reserve(b - a);
-                std::vector<GameObject*> reorderObjects;
-                reorderObjects.reserve(b - a);
+                        if (moveY != 0.f)
+                            obj->m_startPosOffset.y += moveY;
+                        if (moveX != 0.f && !obj->m_tintTrigger) {
+                            obj->m_startPosOffset.x += moveX;
+                            if (sectionChanged(obj))
+                                reorderObjects->push_back(obj);
+                        }
 
-                for(unsigned int i = a; i < b; ++i) {
-                    auto* obj = (GameObject*)arr[i];
-                    if(!obj)
-                        break;
-                    moveObject(obj, moveX, moveY, moveObjType, objects, disabledObjects, reorderObjects);
-                }
-
-                if (!objects.empty()) {
-                    std::unique_lock lock(objectsVecMutex, std::try_to_lock_t());
-                    if (lock) {
-                        for (const auto& obj : objects)
-                            m_objectsVec.push_back(obj);
-                        objects.clear();
+                        if (obj->m_inOptimizedGroup && !obj->m_queuedForPositionUpdate) {
+                            obj->m_queuedForPositionUpdate = true;
+                            disabledObjects->push_back(obj);
+                        }
                     }
-                }
-                if (!disabledObjects.empty()) {
-                    std::unique_lock lock(disabledObjectsMutex, std::try_to_lock_t());
-                    if (lock) {
-                        for (const auto& obj : disabledObjects)
-                            m_disabledObjects.push_back(obj);
-                        disabledObjects.clear();
-                    }
-                }
-                if (!reorderObjects.empty()) {
-                    std::scoped_lock lock(reorderObjectSectionMutex);
-                    for (const auto& obj : reorderObjects)
-                        reorderObjectSection(obj);
-                }
-                if (!objects.empty()) {
-                    std::scoped_lock lock(objectsVecMutex);
-                    for (const auto& obj : objects)
-                        m_objectsVec.push_back(obj);
-                }
-                if (!disabledObjects.empty()) {
-                    std::scoped_lock lock(disabledObjectsMutex);
-                    for (const auto& obj : disabledObjects)
-                        m_disabledObjects.push_back(obj);
-                }
-            });
+                }, blks.start(i), blks.end(i));
+        }
         {
             ZoneScopedN("wait");
             moveJob.wait();
-        }
-    }
-    void moveObject(GameObject* obj, float moveX, float moveY, CCObjectType moveObjType,
-        std::vector<GameObject*>& objects, std::vector<GameObject*>& disabledObjects,
-        std::vector<GameObject*>& reorderObjects) {
-        ZoneScoped;
-
-        if (!obj->m_inOptimizedGroup) {
-            if (!obj->m_queuedForPositionUpdate) {
-                obj->m_firstPosition = obj->m_startPosition + obj->m_startPosOffset;
-                obj->m_queuedForPositionUpdate = true;
-                objects.push_back(obj);
-                obj->m_isObjectRectDirty = true;
-                obj->m_isOrientedRectDirty = true;
-            }
-            if (moveObjType == CCObjectType::GameObject)
-                obj->m_shouldUpdateFirstPosition = true;
-        }
-        obj->m_textureRectDirty = true;
-
-        if (moveY != 0.f)
-            obj->m_startPosOffset.y += moveY;
-        if (moveX != 0.f && !obj->m_tintTrigger) {
-            obj->m_startPosOffset.x += moveX;
-            if (sectionChanged(obj))
-                reorderObjects.push_back(obj);
-        }
-
-        if (obj->m_inOptimizedGroup && !obj->m_queuedForPositionUpdate) {
-            obj->m_queuedForPositionUpdate = true;
-            disabledObjects.push_back(obj);
         }
     }
 
@@ -202,80 +230,55 @@ struct FastMoveActions : geode::Modify<FastMoveActions, GJBaseGameLayer> {
     void processRotationAround(CCArray* objects, CCPoint parentPos, float rotationDeg, bool forceUpdate, bool lockRot) {
         ZoneScoped;
         float rotationRad = -rotationDeg / 180.f * std::numbers::pi_v<float>;
-
         if(objects->count() == 0)
             return;
         CCObject** arr = objects->data->arr;
-        BS::multi_future<void> rotateJob = sharedPool().parallelize_loop(0, objects->data->num,
-            [this, arr, rotationDeg, rotationRad, parentPos, lockRot, forceUpdate](unsigned int a, unsigned int b) {
-                ZoneScopedN("rotate around job");
+        auto& pool = sharedPool();
+        BS::blocks blks(0, objects->data->num, pool.get_thread_count());
+        if (blks.get_total_size() <= 0)
+            return;
+        BS::multi_future<void> rotateJob(blks.get_num_blocks());
+        while (objectsVecVec.size() < blks.get_num_blocks())
+            objectsVecVec.push_back(new std::vector<GameObject*>());
+        while (disabledObjectsVec.size() < blks.get_num_blocks())
+            disabledObjectsVec.push_back(new std::vector<GameObject*>());
+        while (reorderObjectsVec.size() < blks.get_num_blocks())
+            reorderObjectsVec.push_back(new std::vector<GameObject*>());
+        for (size_t i = 0; i < blks.get_num_blocks(); ++i) {
+            auto* objectsVec = objectsVecVec[i];
+            auto* disabledObjects = disabledObjectsVec[i];
+            auto* reorderObjects = reorderObjectsVec[i];
+            rotateJob[i] = pool.submit(
+                [=, this](unsigned int a, unsigned int b) {
+                    ZoneScopedN("rotate around job");
+                    for(unsigned int i = a; i < b; ++i) {
+                        auto* obj = (GameObject*)arr[i];
+                        if(!obj)
+                            break;
+                        obj->m_wasForcedRotatedPositionUpdateIdk = forceUpdate;
 
-                std::vector<GameObject*> objects;
-                objects.reserve(b - a);
-                std::vector<GameObject*> disabledObjects;
-                disabledObjects.reserve(b - a);
-                std::vector<GameObject*> reorderObjects;
-                reorderObjects.reserve(b - a);
+                        if(!obj->m_inOptimizedGroup && !obj->m_queuedForPositionUpdate) {
+                            obj->m_firstPosition = obj->getRealPosition();
+                            obj->m_queuedForPositionUpdate = true;
+                            objectsVec->push_back(obj);
+                            obj->m_isObjectRectDirty = true;
+                            obj->m_isOrientedRectDirty = true;
+                        }
+                        obj->m_textureRectDirty = true;
 
-                for(unsigned int i = a; i < b; ++i) {
-                    auto* obj = (GameObject*)arr[i];
-                    if(!obj)
-                        break;
-                    obj->m_wasForcedRotatedPositionUpdateIdk = forceUpdate;
+                        rotateObjectPosition(obj, rotationRad, parentPos);
+                        if(!lockRot)
+                            rotateObject(obj, rotationDeg);
+                        if (sectionChanged(obj))
+                            reorderObjects->push_back(obj);
 
-                    if(!obj->m_inOptimizedGroup && !obj->m_queuedForPositionUpdate) {
-                        obj->m_firstPosition = obj->getRealPosition();
-                        obj->m_queuedForPositionUpdate = true;
-                        objects.push_back(obj);
-                        obj->m_isObjectRectDirty = true;
-                        obj->m_isOrientedRectDirty = true;
+                        if(obj->m_inOptimizedGroup && !obj->m_queuedForPositionUpdate) {
+                            obj->m_queuedForPositionUpdate = true;
+                            disabledObjects->push_back(obj);
+                        }
                     }
-                    obj->m_textureRectDirty = true;
-
-                    rotateObjectPosition(obj, rotationRad, parentPos);
-                    if(!lockRot)
-                        rotateObject(obj, rotationDeg);
-                    if (sectionChanged(obj))
-                        reorderObjects.push_back(obj);
-
-                    if(obj->m_inOptimizedGroup && !obj->m_queuedForPositionUpdate) {
-                        obj->m_queuedForPositionUpdate = true;
-                        disabledObjects.push_back(obj);
-                    }
-                }
-
-                if (!objects.empty()) {
-                    std::unique_lock lock(objectsVecMutex, std::try_to_lock_t());
-                    if (lock) {
-                        for (const auto& obj : objects)
-                            m_objectsVec.push_back(obj);
-                        objects.clear();
-                    }
-                }
-                if (!disabledObjects.empty()) {
-                    std::unique_lock lock(disabledObjectsMutex, std::try_to_lock_t());
-                    if (lock) {
-                        for (const auto& obj : disabledObjects)
-                            m_disabledObjects.push_back(obj);
-                        disabledObjects.clear();
-                    }
-                }
-                if (!reorderObjects.empty()) {
-                    std::scoped_lock lock(reorderObjectSectionMutex);
-                    for (const auto& obj : reorderObjects)
-                        reorderObjectSection(obj);
-                }
-                if (!objects.empty()) {
-                    std::scoped_lock lock(objectsVecMutex);
-                    for (const auto& obj : objects)
-                        m_objectsVec.push_back(obj);
-                }
-                if (!disabledObjects.empty()) {
-                    std::scoped_lock lock(disabledObjectsMutex);
-                    for (const auto& obj : disabledObjects)
-                        m_disabledObjects.push_back(obj);
-                }
-            });
+                }, blks.start(i), blks.end(i));
+        }
         {
             ZoneScopedN("wait");
             rotateJob.wait();
