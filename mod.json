@@ -13,13 +13,13 @@
             "type": "int",
             "min": 0,
             "max": 4,
-            "default": 3
+            "default": 0
         },
         "fast-alt-tab": {
             "name": "Fast Alt Tab",
             "description": "Disables saving when minimizing the game",
             "type": "bool",
-            "default": false
+            "default": true
         },
         "force-rgba8888": {
             "name": "Force RGBA8888",
