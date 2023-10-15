@@ -16,6 +16,7 @@ add_library(${PROJECT_NAME} SHARED
   src/features/optimizations/loading/qoi_cache.cpp
   src/features/optimizations/loading/threading.cpp
   src/features/optimizations/processing/move_actions.cpp
+  src/features/optimizations/processing/fast_pickup.cpp
   src/features/optimizations/rendering/fast_batch_sort.cpp
   #src/features/optimizations/rendering/opengl_update.cpp
   src/features/optimizations/rendering/threading.cpp
