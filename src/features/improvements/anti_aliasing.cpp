@@ -3,9 +3,9 @@ using namespace geode::prelude;
 #include <Geode/modify/CCEGLView.hpp>
 
 #ifdef GEODE_IS_WINDOWS
-struct Antialiasing : geode::Modify<Antialiasing, CCEGLView> {
+struct AntiAliasing : geode::Modify<AntiAliasing, CCEGLView> {
     void setupWindow(CCRect rect) {
-        auto setting = Mod::get()->getSettingValue<int64_t>("antialiasing");
+        auto setting = Mod::get()->getSettingValue<int64_t>("anti-aliasing");
         int samples = 0;
         switch(setting) {
             case 1:

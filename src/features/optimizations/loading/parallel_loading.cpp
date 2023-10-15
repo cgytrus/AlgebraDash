@@ -123,7 +123,7 @@ public:
     }
 };
 
-struct ThreadedLoadingLayer : geode::Modify<ThreadedLoadingLayer, LoadingLayer> {
+struct ParallelLoadingLayer : geode::Modify<ParallelLoadingLayer, LoadingLayer> {
     int m_maxProgress = 0;
 
     void load(LoadingLayer* self) {

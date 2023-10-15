@@ -8,19 +8,19 @@ add_library(${PROJECT_NAME} SHARED
   src/shared_pool.cpp
   #src/debug/profiler.cpp
   #src/debug/stats.cpp
-  src/features/improvements/antialiasing.cpp
+  src/features/improvements/anti_aliasing.cpp
   src/features/improvements/fast_alt_tab.cpp
   src/features/improvements/force_rgba8888.cpp
   src/features/improvements/main_loop_rewrite.cpp
   src/features/improvements/smooth_particles.cpp
   src/features/optimizations/loading/qoi_cache.cpp
-  src/features/optimizations/loading/threading.cpp
+  src/features/optimizations/loading/parallel_loading.cpp
   src/features/optimizations/processing/move_actions.cpp
   src/features/optimizations/processing/fast_pickup.cpp
   src/features/optimizations/rendering/fast_batch_sort.cpp
   #src/features/optimizations/rendering/opengl_update.cpp
-  src/features/optimizations/rendering/threading.cpp
-  src/features/optimizations/rendering/updatevisibility_rewrite.cpp
+  src/features/optimizations/rendering/parallel_batch.cpp
+  src/features/optimizations/rendering/update_visibility_rewrite.cpp
 )
 
 if (NOT DEFINED ENV{GEODE_SDK})

@@ -7,8 +7,8 @@
     "description": "",
     "early-load": true,
     "settings": {
-        "antialiasing": {
-            "name": "Antialiasing",
+        "anti-aliasing": {
+            "name": "Anti-aliasing",
             "description": "Enables antialiasing to improve visual quality. Goes from Off (0) to MSAA x16 (4). Doesn't work on macOS. Requires restart",
             "type": "int",
             "min": 0,
